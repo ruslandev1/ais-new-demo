@@ -7,12 +7,18 @@ import {
 } from "react-router-dom";
 import { Provider } from 'react-redux'
 import LoginPage from "./pages/LoginPage.jsx"
-import store from "./store/store.js"
-import './index.css'
 import HomePage from './pages/HomePage.jsx';
+import {fetchAppUserAccessInfoIfNeeded} from "./actions/AppStateActions";
+import './index.css'
+
+
+const store = configureStore();
+
+store.dispatch(fetchAppUserAccessInfoIfNeeded());
+
 
 const router = createBrowserRouter([
-
+  
   {
     path: "/",
     element: <HomePage />,
@@ -24,13 +30,12 @@ const router = createBrowserRouter([
   ,
 ]);
 
-// import store from './store'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* <Provider store={store}> */}
+    <Provider store={store}>
     <RouterProvider router={router} />
     <App />
-    {/* </Provider> */}
+    </Provider>
   </React.StrictMode>,
 )
