@@ -8,9 +8,11 @@ import withStyles from "@mui/material/styles/withStyles";
 // @mui/icons-material
 
 // core components
-import cardStyle from "../../../assets/jss/card/cardStyle";
 
-function Card({ ...props }) {
+
+
+
+export default function Card({ ...props }) {
   const {
     classes,
     className,
@@ -20,6 +22,7 @@ function Card({ ...props }) {
     chart,
     ...rest
   } = props;
+  console.log("Card props", props)
   const cardClasses = classNames({
     [classes.card]: true,
     [classes.cardPlain]: plain,
@@ -42,4 +45,3 @@ Card.propTypes = {
   chart: PropTypes.bool
 };
 
-export default withStyles(cardStyle)(Card);

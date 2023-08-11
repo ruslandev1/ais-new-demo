@@ -4,13 +4,12 @@ import classNames from "classnames";
 // nodejs library to set properties for components
 import PropTypes from "prop-types";
 // @mui/material components
-import withStyles from "@mui/material/styles/withStyles";
+// import withStyles from "@mui/material/styles/withStyles";
 // @mui/icons-material
 
 // core components
-import cardBodyStyle from "../../../assets/jss/card/cardBodyStyle.jsx";
 
-function CardBody({ ...props }) {
+export default function CardBody({ ...props }) {
   const { classes, className, children, plain, profile, ...rest } = props;
   const cardBodyClasses = classNames({
     [classes.cardBody]: true,
@@ -32,4 +31,3 @@ CardBody.propTypes = {
   profile: PropTypes.bool
 };
 
-export default withStyles(cardBodyStyle)(CardBody);

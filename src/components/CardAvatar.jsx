@@ -8,9 +8,8 @@ import withStyles from "@mui/material/styles/withStyles";
 // @mui/icons-material
 // core components
 
-import cardAvatarStyle from "../../../assets/jss/card/cardAvatarStyle";
 
-function CardAvatar({...props }) {
+export default function CardAvatar({...props }) {
   const { classes, children, className, plain, profile, ...rest } = props;
   const cardAvatarClasses = classNames({
     [classes.cardAvatar]: true,
@@ -32,4 +31,3 @@ CardAvatar.propTypes = {
   plain: PropTypes.bool
 };
 
-export default withStyles(cardAvatarStyle)(CardAvatar);

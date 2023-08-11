@@ -38,7 +38,7 @@ const Mainlayout = styled('main')(({ theme }) => ({
 const PageWrapper = ({component}) => {
     console.log("component", component)
     return (
-        <div id={"idPageWrapper"} style={{ display: "flex" }}>
+        <div id={"idPageWrapper"}>
             <CssBaseline>
                 <Root>
                     <Appframe>
