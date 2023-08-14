@@ -92,11 +92,11 @@ class Home extends React.Component {
     console.log("USER INFO", this.state.user)
     if (isEmpty(user)) return <div />;
     return (
-        <Card sx={{display: "flex", flexDirection: "column", alignItems: "center", overflow: "visible", margin: 0, padding: 0}}>
+        <Card sx={{ display: "flex", flexDirection: "column", alignItems: "center", overflow: "visible", margin: 0, padding: 0}}>
           <CardMedia> 
             <Avatar
             ref={this.imgRef} 
-            alt="Remy Sharp" 
+            alt="profile picture" 
             src="http://www.markweb.in/primehouseware/images/noimage.png" 
             sx={{ 
                 width: 125, 
@@ -120,7 +120,5 @@ class Home extends React.Component {
   }
 }
 
-Home.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
+
 export default (Home);

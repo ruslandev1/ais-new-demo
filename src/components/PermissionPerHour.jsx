@@ -78,6 +78,7 @@ export default function EmpSaatliqIcaze(props) {
   const [data, setData] = useState([]);
 
   const loadSaatliqIcaze = (id) => {
+    console.log(id)
     ApiHelper.getMethod(
       GET_SAATLIQ_ICAZE + id,
       () => {},
@@ -91,6 +92,7 @@ export default function EmpSaatliqIcaze(props) {
   useEffect(() => {
     loadSaatliqIcaze(props.empId);
   }, []);
+  
   console.log("dataaaa", data.length);
   return (
     <StyledCard className={classes.card}>

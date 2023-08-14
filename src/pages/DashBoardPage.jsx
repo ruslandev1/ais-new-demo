@@ -3,6 +3,7 @@ import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import MuiAppBar from '@mui/material/AppBar';
+import { Paper } from '@mui/material';
 import Container from '@mui/material/Container';
 // import Grid from '@mui/material/Grid';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
@@ -15,6 +16,27 @@ import EmpGirisCixis from '../components/GirisCixisIcaze';
 const drawerWidth = 240;
 
 
+
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
+  ({ theme, open }) => ({
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    marginLeft: `-${drawerWidth}px`,
+    ...(open && {
+      transition: theme.transitions.create('margin', {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+      marginLeft: 0,
+    }),
+  }),
+);
+
+
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
 })(({ theme, open }) => ({
@@ -25,7 +47,6 @@ const AppBar = styled(MuiAppBar, {
     }),
     ...(open && {
         marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
         transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
@@ -43,6 +64,9 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.enteringScreen,
             }),
+            '& .css-1f2xuhi-MuiDrawer-docked': {
+                width: 0 ,
+            },
             boxSizing: 'border-box',
             ...(!open && {
                 overflowX: 'hidden',
@@ -70,39 +94,8 @@ export default function Dashboard() {
 
     return (
         <ThemeProvider theme={defaultTheme}>
-            {/* <Box
-          component="main"
-          sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
-            flexGrow: 1,
-            height: 'auto',
-            overflow: 'auto',
-            width:"100%"
-          }}> */}
-            {/* <Container maxWidth="lg" sx={{ mb: 5 }}>
-                <Grid container rowSpacing={5} columnSpacing={5} direction="row" >
-                    <Grid item xs={4}>
-                        <Home />
-                    </Grid>
-                    <Grid item xs={4}>
-                        <EmpSaatliqIcaze />
-                    </Grid>
-                    <Grid item xs={4}>
-                        <EmpMezuniyyet />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                            <EmpInventar />
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <EmpGirisCixis />
-                    </Grid>
-                </Grid>
-            </Container> */}
+            <Box sx={{display: 'flex'}}>
+            <Container>
             <Grid container rowSpacing={4} columnSpacing={{ xs: 1, sm: 2, md: 3}}>
                 <Grid xs={4}>
                 <Home />
@@ -114,14 +107,18 @@ export default function Dashboard() {
                 <EmpMezuniyyet />
                 </Grid>
                 <Grid xs={6}>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
                 <EmpInventar />
+                </Paper>
                 </Grid>
                 <Grid xs={6}>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
                 <EmpGirisCixis />
+                </Paper>
                 </Grid>
             </Grid>
-            {/* </Box> */}
-            {/* </Box> */}
+            </Container>
+            </Box>
         </ThemeProvider>
     );
 }

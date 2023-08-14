@@ -23,6 +23,11 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp'
+import { AccountCircle } from '@mui/icons-material';
+import { Menu } from '@mui/material';
+import MenuAppBar from './MenuAppbar';
+import MenuItem from '@mui/material/MenuItem';
+
 const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -122,6 +127,12 @@ export default function Header() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
 
   const handleDrawerOpen = () => {
@@ -132,14 +143,18 @@ export default function Header() {
     setOpen(false);
   };
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
+    // <Box sx={{ display: 'flex' }}>
+    <CssBaseline>
       <AppBar position="fixed" open={open}>
-        <Toolbar>
+        <Toolbar sx={{justifyContent: "space-between"}}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -152,11 +167,39 @@ export default function Header() {
           <Typography variant="h6" noWrap component="div">
             Əsas Səhifə
           </Typography>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleClose}>Profil</MenuItem>
+                <MenuItem onClick={handleClose}>Tənzimləmə</MenuItem>
+                <MenuItem onClick={handleClose}>Çıxış</MenuItem>
+              </Menu>
         </Toolbar>
       </AppBar>
       <Drawer
         sx={{
-          width: drawerWidth,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
             width: drawerWidth,
@@ -244,7 +287,7 @@ export default function Header() {
       </Accordion>
     </div>
       </Drawer>
-    </Box>
+    </CssBaseline>
   );
 }
 
