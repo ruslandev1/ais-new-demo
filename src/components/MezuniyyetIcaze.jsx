@@ -3,10 +3,7 @@ import { styled } from '@mui/material/styles';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-// import { makeStyles } from "@mui/styles";
-import { makeStyles } from "@mui/material";
 import { BACKEND_URL } from "../utils/Constants";
-// import ApiHelper from "utils/ApiHelper";
 import ApiHelper from "../utils/ApiHelper";
 import ToastHelper from "../utils/ToastHelper";
 

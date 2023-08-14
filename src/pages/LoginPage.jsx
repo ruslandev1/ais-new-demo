@@ -7,9 +7,9 @@ import LoginForm from "../components/LoginForm";
 
 
 const LoginPage = (props) => { 
-    let location = useLocation();
-    console.log("login-state: ", props)
-    return props.isAuthenticated ? <Navigate to="/" state={{ from: location }} replace /> : <LoginForm />;
+    console.log("login-state-page: ", props)
+    const navigate = useNavigate();
+    return props.isAuthenticated ? <Navigate replace to="/"/>  : <LoginForm />;
 }
 
 

@@ -51,7 +51,7 @@ const StyledForm = styled('form')(({ theme }) => ({
   marginTop: theme.spacing(1),
 }));
 const ButtonSubmit = styled(Button)(({ theme }) => ({
-  marginTop: theme.spacing(3),
+  marginTop: theme.spacing(4),
 }));
 
 // TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
@@ -66,15 +66,11 @@ function SignIn(props) {
     onChange,
     username,
     password,
-    isCaptchaRequired,
-    resetCaptcha,
     errors,
     logInProgress,
   } = props;
 
-//   if (resetCaptcha && resetCaptcha === true && recaptchaInstance) {
-//     recaptchaInstance.execute();
-//   }
+
   return (
     <Fragment>
       <CssBaseline />
@@ -130,7 +126,7 @@ function SignIn(props) {
                 </FormHelperText>
               )}
             </FormControl>
-            {!isCaptchaRequired && (
+            {(
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"

@@ -1,21 +1,14 @@
 import React, { Fragment } from "react";
-import { Outlet} from "react-router-dom";
 import { connect } from "react-redux";
 import { fetchAppUserAccessInfoIfNeeded } from "../actions/AppStateActions";
 import { LinearProgress } from "@mui/material";
 import { Navigate} from "react-router-dom";
-import Dashboard from "../pages/DashBoardPage";
 import HomePage from "../pages/HomePage";
 
 const ProtectedRoute = ({
-  component: Component,
-  dispatch,
   accessState,
   loginState,
   fetchAppUserAccessInfoIfNeeded,
-  redirectPath="/login",
-  children,
-  ...rest
 }) => {
   if (
     !accessState ||
@@ -37,8 +30,7 @@ if (!loginState.isAuthenticated) {
     console.log("LOGIN_STATE", loginState)
     return <Navigate to={"/login"} replace />;
   }
-
-  return  <HomePage/>;
+  return <HomePage />
 ; 
 };
 
