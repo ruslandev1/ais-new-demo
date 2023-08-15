@@ -9,6 +9,10 @@ import ApiHelper from "../utils/ApiHelper";
 import ToastHelper from "../utils/ToastHelper";
 import { useState, useEffect } from "react";
 
+const GET_SAATLIQ_ICAZE =
+  BACKEND_URL + "/api/EmpIcazeSaat/GetIcazeSaatByEmpId/";
+
+
 const PREFIX = 'EmpSaatliqIcaze';
 
 const classes = {
@@ -70,15 +74,14 @@ const StyledCard = styled(Card)(() => ({
   }
 }));
 
-const GET_SAATLIQ_ICAZE =
-  BACKEND_URL + "/api/EmpIcazeSaat/GetIcazeSaatByEmpId/";
 
 export default function EmpSaatliqIcaze(props) {
 
   const [data, setData] = useState([]);
+  console.log("SAATLIG", props)
 
   const loadSaatliqIcaze = (id) => {
-    console.log(id)
+    console.log("ID", id)
     ApiHelper.getMethod(
       GET_SAATLIQ_ICAZE + id,
       () => {},
@@ -93,7 +96,7 @@ export default function EmpSaatliqIcaze(props) {
     loadSaatliqIcaze(props.empId);
   }, []);
   
-  console.log("dataaaa", data.length);
+  console.log("dataaaa", data);
   return (
     <StyledCard className={classes.card}>
       <CardContent style={{ padding: "20px" }}>

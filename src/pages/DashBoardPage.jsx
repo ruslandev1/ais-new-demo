@@ -17,22 +17,22 @@ const drawerWidth = 240;
 
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+    ({ theme, open }) => ({
+        flexGrow: 1,
+        padding: theme.spacing(3),
+        transition: theme.transitions.create('margin', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        marginLeft: `-${drawerWidth}px`,
+        ...(open && {
+            transition: theme.transitions.create('margin', {
+                easing: theme.transitions.easing.easeOut,
+                duration: theme.transitions.duration.enteringScreen,
+            }),
+            marginLeft: 0,
+        }),
     }),
-    marginLeft: `-${drawerWidth}px`,
-    ...(open && {
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginLeft: 0,
-    }),
-  }),
 );
 
 
@@ -64,7 +64,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
                 duration: theme.transitions.duration.enteringScreen,
             }),
             '& .css-1f2xuhi-MuiDrawer-docked': {
-                width: 0 ,
+                width: 0,
             },
             boxSizing: 'border-box',
             ...(!open && {
@@ -85,7 +85,8 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export default function Dashboard() {
+export default function Dashboard(props) {
+    console.log("DASHBOARD PROPS", props)
     const [open, setOpen] = React.useState(true);
     const toggleDrawer = () => {
         setOpen(!open);
@@ -93,30 +94,30 @@ export default function Dashboard() {
 
     return (
         <ThemeProvider theme={defaultTheme}>
-            <Box sx={{display: 'flex'}}>
-            <Container>
-            <Grid container rowSpacing={4} columnSpacing={{ xs: 1, sm: 2, md: 3}}>
-                <Grid xs={4}>
-                <Home />
-                </Grid>
-                <Grid xs={4}>
-                <EmpSaatliqIcaze />
-                </Grid>
-                <Grid xs={4}>
-                <EmpMezuniyyet />
-                </Grid>
-                <Grid xs={6}>
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                <EmpInventar />
-                </Paper>
-                </Grid>
-                <Grid xs={6}>
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                <EmpGirisCixis />
-                </Paper>
-                </Grid>
-            </Grid>
-            </Container>
+            <Box sx={{ display: 'flex' }}>
+                <Container>
+                    <Grid container rowSpacing={4} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                        <Grid xs={4}>
+                            <Home />
+                        </Grid>
+                        <Grid xs={4}>
+                            <EmpSaatliqIcaze empId={props.empId} />
+                        </Grid>
+                        <Grid xs={4}>
+                            <EmpMezuniyyet empId={props.empId} />
+                        </Grid>
+                        <Grid xs={6}>
+                            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                                <EmpInventar empId={props.empId} />
+                            </Paper>
+                        </Grid>
+                        <Grid xs={6}>
+                            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                                <EmpGirisCixis empId={props.empId} />
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                </Container>
             </Box>
         </ThemeProvider>
     );

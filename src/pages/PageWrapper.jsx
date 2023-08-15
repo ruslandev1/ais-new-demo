@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import CssBaseline from "@mui/material/CssBaseline";
 import { styled } from '@mui/material/styles';
-
+import { connect } from "react-redux";
 
 
 const Root = styled('Root')(({ theme }) => ({
@@ -35,7 +35,7 @@ const Mainlayout = styled('main')(({ theme }) => ({
 }));
 
 
-const PageWrapper = ({component}) => {
+const PageWrapper = ({component, dispatch}) => {
     console.log("component", component)
     return (
         <div id={"idPageWrapper"}>
@@ -57,10 +57,5 @@ const PageWrapper = ({component}) => {
 
 
 
-export default PageWrapper;
+export default connect(null)(PageWrapper);
 
-// export default withStyles(persistentDrawerStyle, {withTheme: true})(connect((state) => {
-//     return {
-//         drawerOpen: state.drawerState.drawerOpen,
-//     };
-// }, null)(PageWrapper));

@@ -25,9 +25,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp'
 import { AccountCircle } from '@mui/icons-material';
 import { Menu } from '@mui/material';
-import MenuAppBar from './MenuAppbar';
 import MenuItem from '@mui/material/MenuItem';
-
+import { Link } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -218,14 +218,16 @@ export default function Header() {
         <Divider />
         <List>
           {['Əsas Səhifə', 'Qısayol keçidlər', 'Hesabat'].map((text, index) => (
-            <ListItem key={text} disablePadding>
+            <RouterLink to={"/shorcut-links"}>
+            <Link  key={text} disablePadding  underline='none' sx={{color: "black"}}>
               <ListItemButton>
                 <ListItemIcon>
                   {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
                 </ListItemIcon>
                 <ListItemText primary={text} />
               </ListItemButton>
-            </ListItem>
+            </Link>
+            </RouterLink>
           ))}
         </List>
         <Divider />

@@ -12,6 +12,7 @@ import azMessages from "./utils/az.json";
 import { isEmpty } from './utils';
 import { setCurrentUser } from "./actions/loginAction";
 import { loadMessages } from "devextreme/localization";
+import ShortcutLinks from './components/shorcut-links/ShorcutLinks';
 
 
 const router = createBrowserRouter([
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />,
   },
+  {
+    path : "/shorcut-links",
+    element : <ShortcutLinks />
+  }
   ,
 ]);
 

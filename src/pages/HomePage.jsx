@@ -6,7 +6,8 @@ import { setModuleTitle } from "../actions/AppStateActions";
 
 
 const HomePage = (props) => {
-  return <PageWrapper component={<Dashboard />}/>
+  console.log("HOMEPAGE PROPS", props)
+  return <PageWrapper component={<Dashboard  empId={props.user.empId}/>}/>
 }
 
 
