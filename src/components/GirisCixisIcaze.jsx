@@ -21,7 +21,6 @@ const EmpGirisCixis = (props) => {
         () => {},
         ToastHelper.error,
         (data) => {
-          console.log('issat',data);
            setResults(data??[]);
         }
       );

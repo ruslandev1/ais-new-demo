@@ -127,12 +127,11 @@ const Accordion = styled((props) => (
   }));
 
 
- function Header({isAuthenticated: auth, logOut, user}) {
+ function Header({isAuthenticated: auth, logOut, user, ...props}) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
-
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -176,7 +175,7 @@ const Accordion = styled((props) => (
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Əsas Səhifə
+            {props.moduleTitle}
           </Typography>
               <IconButton
                 size="large"
@@ -231,7 +230,7 @@ const Accordion = styled((props) => (
         <Divider />
         <List>
           {['Əsas Səhifə', 'Qısayol keçidlər', 'Hesabat'].map((text, index) => (
-            <RouterLink to={"/shorcut-links"}>
+            <RouterLink to="/">
             <Link  key={text} disablePadding  underline='none' sx={{color: "black"}}>
               <ListItemButton>
                 <ListItemIcon>

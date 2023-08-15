@@ -13,6 +13,7 @@ import { isEmpty } from './utils';
 import { setCurrentUser } from "./actions/loginAction";
 import { loadMessages } from "devextreme/localization";
 import ShortcutLinks from './components/shorcut-links/ShorcutLinks';
+import ProfilePage from './pages/ProfilePage';
 
 
 const router = createBrowserRouter([
@@ -31,7 +32,7 @@ const router = createBrowserRouter([
   },
   {
     path : "/profile",
-    element : <Profil />
+    element : <ProfilePage />
   }
   ,
 ]);
