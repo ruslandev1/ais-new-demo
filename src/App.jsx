@@ -28,6 +28,10 @@ const router = createBrowserRouter([
   {
     path : "/shorcut-links",
     element : <ShortcutLinks />
+  },
+  {
+    path : "/profile",
+    element : <Profil />
   }
   ,
 ]);
@@ -42,9 +46,9 @@ function App({loadAuthToken}) {
   
 
   return (
-    <>
+    <div className='main-wrapper'>
       <RouterProvider router={router} />
-    </>
+    </div>
   )
 }
 
