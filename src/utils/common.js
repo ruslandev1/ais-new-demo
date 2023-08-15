@@ -1,4 +1,4 @@
-import store from '../index';
+import store from '../main';
 import {
     PRIV_KPIADMIN_AMB_OPERATOR,
     PRIV_KPIADMIN_MAIN_OPERATOR,
