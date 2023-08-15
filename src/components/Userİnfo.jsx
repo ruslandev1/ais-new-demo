@@ -1,13 +1,12 @@
 import React from "react";
 import { styled } from '@mui/material/styles';
-import PropTypes from "prop-types";
 import Card from '@mui/material/Card';
 import MuiCardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { Avatar } from "@mui/material";
+import { Avatar as MuiAvatar } from "@mui/material";
 import {
   avrFetch,
   readResponseAsBlob,
@@ -20,11 +19,17 @@ import { isEmpty } from "../utils";
 
 const PREFIX = 'Home';
 
-const CardActions = styled('CardActions')(({ theme }) => ({
-    '& .css-1knaqv7-MuiButtonBase-root-MuiButton-root': {
-        fontSize: "0.65rem",
-        fontWeight: "700"
-      },
+const CardActions = styled(MuiCardActions)(({ theme }) => ({
+  '& .css-1knaqv7-MuiButtonBase-root-MuiButton-root': {
+    fontSize: "0.65rem",
+    fontWeight: "700"
+  },
+}));
+
+const Avatar = styled(MuiAvatar)(({ theme }) => ({
+  '& .profile-image': {
+      maxWidth: "100%",  
+    },
 }));
 
 class Home extends React.Component {
@@ -61,7 +66,6 @@ class Home extends React.Component {
       .then((myBlob) => {
         const file = new Blob([myBlob], { type: "image/jpeg" });
         let fileUrl = (window.URL || window.webkitURL).createObjectURL(file);
-        console.log("fileUrlfileUrl: ", fileUrl);
         this.imgRef.current.src = fileUrl;
       })
       .catch((reason) =>
@@ -83,40 +87,35 @@ class Home extends React.Component {
           this.setState(Object.assign({}, this.state, { user: response.data }));
         }
       })
-      .catch((reason) => {});
+      .catch((reason) => { });
   }
 
   render() {
     const { } = this.props;
     const { user } = this.state;
-    console.log("USER INFO", this.state.user)
     if (isEmpty(user)) return <div />;
     return (
-        <Card sx={{ display: "flex", flexDirection: "column", alignItems: "center", overflow: "visible", margin: 0, padding: 0}}>
-          <CardMedia> 
-            <Avatar
-            ref={this.imgRef} 
-            alt="profile picture" 
-            src="http://www.markweb.in/primehouseware/images/noimage.png" 
-            sx={{ 
-                width: 125, 
-                height: 125,
-                position: "relative",
-                bottom: 70,
-                zIndex: 2,
-            }} 
+      <Card sx={{ display: "flex", flexDirection: "column", alignItems: "center", overflow: "visible", margin: 0, padding: 0 }}>
+        <CardMedia>
+          <Avatar sx={{width: 130, height: 130, bottom: 50, textAlign: "center"}}>
+            <img
+              ref={this.imgRef}
+              alt="profile picture"
+              src="http://www.markweb.in/primehouseware/images/noimage.png"
+              className="profile-image"
             />
-            </CardMedia>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
+          </Avatar>
+        </CardMedia>
+        <CardContent>
+          <Typography gutterBottom variant="h5" component="div" sx={{fontSize : "0.875rem"}}>
             {user.firstName} / {user.lastName}
-            </Typography>
-          </CardContent>
-          <CardActions>
-            <Button size="small">Çox istifadə edilən keçidlər üçün buraya klik edin</Button>
-          </CardActions>
-        </Card>
-      );
+          </Typography>
+        </CardContent>
+        <CardActions>
+          <Button size="small">Çox istifadə edilən keçidlər üçün buraya klik edin</Button>
+        </CardActions>
+      </Card>
+    );
   }
 }
 

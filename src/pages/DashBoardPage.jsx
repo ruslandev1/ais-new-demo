@@ -86,7 +86,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 const defaultTheme = createTheme();
 
 export default function Dashboard(props) {
-    console.log("DASHBOARD PROPS", props)
     const [open, setOpen] = React.useState(true);
     const toggleDrawer = () => {
         setOpen(!open);
@@ -94,24 +93,39 @@ export default function Dashboard(props) {
 
     return (
         <ThemeProvider theme={defaultTheme}>
-            <Box sx={{ display: 'flex' }}>
+            <Box sx={{ display: 'flex', alignItems: "center", justifyContent: "center" ,marginTop: "200px"}}>
                 <Container>
-                    <Grid container rowSpacing={4} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                        <Grid xs={4}>
+                    <Grid container rowSpacing={{ xs: 4, sm: 5, md: 6, lg: 4 }} columnSpacing={{ xs: 1, sm: 2, md: 3 }} alignItems={"center"}>
+                        <Grid xs={12}
+                            sm={6}
+                            md={4}
+                            lg={4}>
                             <Home />
                         </Grid>
-                        <Grid xs={4}>
+                        <Grid xs={12}
+                            sm={6}
+                            md={4}
+                            lg={4}>
                             <EmpSaatliqIcaze empId={props.empId} />
                         </Grid>
-                        <Grid xs={4}>
+                        <Grid xs={12}
+                            sm={12}
+                            md={4}
+                            lg={4}>
                             <EmpMezuniyyet empId={props.empId} />
                         </Grid>
-                        <Grid xs={6}>
+                        <Grid xs={12}
+                            sm={12}
+                            md={6}
+                            lg={6}>
                             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
                                 <EmpInventar empId={props.empId} />
                             </Paper>
                         </Grid>
-                        <Grid xs={6}>
+                        <Grid xs={12}
+                            sm={12}
+                            md={6}
+                            lg={6}>
                             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
                                 <EmpGirisCixis empId={props.empId} />
                             </Paper>

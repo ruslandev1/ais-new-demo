@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { styled, useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiAppBar from '@mui/material/AppBar';
@@ -28,6 +27,11 @@ import { Menu } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import { Link } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+import {connect} from "react-redux"
+import { logout } from "../actions/loginAction";
+
+
+
 const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -123,7 +127,7 @@ const Accordion = styled((props) => (
   }));
 
 
-export default function Header() {
+ function Header({isAuthenticated: auth, logOut, user}) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
@@ -147,11 +151,18 @@ export default function Header() {
     setAnchorEl(null);
   };
 
+  const handleProfile = () => {
+    setAnchorEl(null);
+  }
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
+
+  const handleLogout = () => {
+    setAnchorEl({ anchorEl: null });
+    logOut(user);
+  };
   return (
-    // <Box sx={{ display: 'flex' }}>
     <CssBaseline>
       <AppBar position="fixed" open={open}>
         <Toolbar sx={{justifyContent: "space-between"}}>
@@ -185,16 +196,18 @@ export default function Header() {
                   horizontal: 'right',
                 }}
                 keepMounted
-                transformOrigin={{
+              transformOrigin={{
                   vertical: 'top',
                   horizontal: 'right',
                 }}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleClose}>Profil</MenuItem>
+                <MenuItem onClick={handleProfile}>
+                  <RouterLink to="/profile">Profil</RouterLink>
+                </MenuItem>
                 <MenuItem onClick={handleClose}>Tənzimləmə</MenuItem>
-                <MenuItem onClick={handleClose}>Çıxış</MenuItem>
+                <MenuItem onClick={handleLogout}>Çıxış</MenuItem>
               </Menu>
         </Toolbar>
       </AppBar>
@@ -293,3 +306,26 @@ export default function Header() {
   );
 }
 
+const mapStateToProps = (state) => {
+  return {
+    moduleTitle: state.appState.moduleTitle,
+    drawerOpen: state.drawerState.drawerOpen,
+    isAuthenticated: state.loginState.isAuthenticated,
+    user: state.loginState.user,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    logOut: (usrname) => {
+      dispatch(logout(usrname));
+    },
+    fromStoreOpenDrawer: () => {
+      dispatch({
+        type: OPEN_DRAWER,
+      });
+    },
+  };
+};
+
+export default (connect(mapStateToProps, mapDispatchToProps)(Header));

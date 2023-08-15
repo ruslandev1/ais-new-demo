@@ -7,9 +7,6 @@ import { styled } from '@mui/material/styles';
 import { connect } from "react-redux";
 
 
-const Root = styled('Root')(({ theme }) => ({
-    flexGrow: 1,
-}));
 
 const Appframe = styled('Appframe')(({ theme }) => ({
     zIndex: 1,
@@ -30,17 +27,17 @@ const Mainlayout = styled('main')(({ theme }) => ({
     }),
     // Added below line for Avrora
     maxWidth: "100%",
+    height: "100vh"
 
     // Fix IE 11 issue.
 }));
 
 
-const PageWrapper = ({component, dispatch}) => {
+const PageWrapper = ({component}) => {
     console.log("component", component)
     return (
         <div id={"idPageWrapper"}>
             <CssBaseline>
-                <Root>
                     <Appframe>
                         <Header />
                         <Mainlayout>
@@ -48,7 +45,6 @@ const PageWrapper = ({component, dispatch}) => {
                         </Mainlayout>
                     </Appframe>
                     <Footer />
-                </Root>
             </CssBaseline>
         </div>
     );
