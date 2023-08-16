@@ -17,11 +17,7 @@ const classes = {
     root3: `${PREFIX}-root3`
 };
 
-const StyledMuiDialogTitle = styled(MuiDialogTitle)((
-    {
-        theme
-    }
-) => ({
+const StyledMuiDialogTitle = styled(MuiDialogTitle)(({theme}) => ({
     [`&.${classes.root}`]: {
         borderBottom: `1px solid ${theme.palette.divider}`,
         margin: 0,

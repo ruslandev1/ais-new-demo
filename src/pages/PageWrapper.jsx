@@ -53,5 +53,5 @@ const PageWrapper = ({component}) => {
 
 
 
-export default connect(null)(PageWrapper);
+export default PageWrapper;
 

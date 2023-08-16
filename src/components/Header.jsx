@@ -230,8 +230,8 @@ const Accordion = styled((props) => (
         <Divider />
         <List>
           {['Əsas Səhifə', 'Qısayol keçidlər', 'Hesabat'].map((text, index) => (
-            <RouterLink to="/">
-            <Link  key={text} disablePadding  underline='none' sx={{color: "black"}}>
+            <RouterLink to="/" key={index + "_rscl"}>
+            <Link  key={index + "_scl"} disablePadding  underline='none' sx={{color: "black"}}>
               <ListItemButton>
                 <ListItemIcon>
                   {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}

@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { styled } from '@mui/material/styles';
 import {
   avrFetch,
@@ -9,11 +9,10 @@ import {
 import { BACKEND_URL } from "../../utils/Constants";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import { Avatar as CardAvatar } from "@mui/material";
-import {CardMedia} from "@mui/material";
+import { Avatar as CardAvatar, Container } from "@mui/material";
+import { CardMedia } from "@mui/material";
 import { Address } from "../AdressSelector";
 import { isEmpty } from "../../utils";
-import * as moment from "moment";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -28,12 +27,11 @@ import {
   DialogContent,
   DialogTitle,
 } from "../reportV2/DialogHelper";
-
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import ImageUpload from "../imageUpload";
-import { UserHasAccessInfoId } from "../../utils/common";
-
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 const PREFIX = 'EmpProfile';
 
 const classes = {
@@ -45,39 +43,13 @@ const classes = {
   menu: `${PREFIX}-menu`
 };
 
-const StyledTableRow = styled(TableRow)((
-  {
-    theme
-  }
-) => ({
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
   [`& .${classes.root}`]: {
     width: "100%",
     marginTop: theme.spacing(3),
     overflowX: "auto",
   },
-
-  [`& .${classes.table}`]: {
-    minWidth: 700,
-    marginBottom: theme.spacing(3),
-  },
-
-  [`& .${classes.container}`]: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-
-  [`& .${classes.textField}`]: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-  },
-
-  [`& .${classes.dense}`]: {
-    marginTop: 16,
-  },
-
-  [`& .${classes.menu}`]: {
-    width: 200,
-  }
+  // ... (other styling classes)
 }));
 
 const inputStyle = {
@@ -91,1293 +63,1177 @@ const inputStyle = {
   background: "white",
 };
 
-class EmpProfile extends React.Component {
-  constructor(props) {
-    super(props);
-    this.empId = this.props.empId;
-    this.state = {
-      empData: {
-        empId: this.empId,
-        cardNo: "",
-        firstName: "",
-        lastName: "",
-        fatherName: "",
-        stateId: 0,
-        placeOfBirth: new Address(),
-        regAddress: new Address(),
-        curAddress: new Address(),
-        birthDate: 0,
-        fin: "",
-        maritalStatus: "",
-        gender: "",
-        authority: "",
-        dateOfIssue: 0,
-        dateOfExpiry: 0,
-        citizenship: "",
-        identityDoc: "",
-        kvotaStatus: [],
-        dsmfCardNo: "",
-        militaryObliged: "",
-        c1Code: "", // BIR CE KODU :-)
-        xusMezStatus: "",
-      },
-      empPos: [],
-      empCurrentPos: {
-        empPosId: 0,
-        depTitle: "",
-        posTitle: "",
-        startDate: 0,
-      },
-      empEdu: {
-        empInst: [],
-        empCourse: [],
-        empCertificate: [],
-      },
-      empContact: [],
-      langSkills: [],
-      compSkills: [],
-      empChildren: [],
-      empWorkExperience: [],
-      open: false,
-    };
-    console.log("EMPPROFILEIDCHECK",this.state);
-    this.imgRef = React.createRef();
-  }
+// add plugin to dayjs
 
-  componentDidMount() {
-    this.loadProfileImg();
-    this.loadEmpData();
-    this.loadEmpPos();
-    this.loadEmpEdu();
-    this.loadEmpCourse();
-    this.loadEmpCertificate();
-    this.loadEmpContact();
-    this.loadLangSkills();
-    this.loadCompSkills();
-    this.loadEmpChildren();
-    this.loadCurrentEmpPos();
-    this.loadEmpWorkExperience();
-  }
+dayjs.extend(utc)
 
-  render() {
-    const empInst = this.state.empEdu.empInst;
-    const empCourse = this.state.empEdu.empCourse;
-    const empCertificate = this.state.empEdu.empCertificate;
-    const empContact = this.state.empContact;
-    const empPos = this.state.empPos;
-    return (
-      <Fragment>
-        <Card style={{ marginTop: 0 }}>
-          <Grid style={{ flexGrow: 1, padding: 0 }}>
-            <Grid
-              item
-              xs={12}
-              container
-              spacing={0}
-              alignItems={"flex-start"}
-              direction={"row"}
-              justifyContent={"flex-start"}
-            >
-              <Grid item xs={2} />
-              <Grid item xs={10}>
-                <h1 style={{ color: "" }}>
-                  {this.state.empData.firstName} {this.state.empData.lastName}{" "}
-                </h1>{" "}
-                {/*style={{color: '#0052cc'}}*/}
-                <h2 style={{ color: "" }}>
-                  {isEmpty(this.state.empCurrentPos)
-                    ? ""
-                    : this.state.empCurrentPos.posTitle}
-                </h2>
-                <p style={{ color: "red" }}>
-                  {this.state.empData.stateId === 2 ? "işdən azad olunub" : ""}
-                </p>
-              </Grid>
-              <Grid item xs={2}>
-                <CardAvatar profile square="true">
-                  <a href="#pablo" onClick={(e) => this.handleClickOpen(e)}>
-                    <img
-                      ref={this.imgRef}
-                      src="http://www.markweb.in/primehouseware/images/noimage.png"
-                      alt="..."
-                    />
-                  </a>
-                </CardAvatar>
-                <CardMedia
-                  profile
-                  square="true"
-                  style={{ justifyContent: "center" }}
-                >
-                  <h5>İstifadəçi adı: {this.state.empData.username}</h5>
-                  <h5>
-                    Doğum tarixi:{" "}
-                    {this.state.empData.birthDate === 0
-                      ? ""
-                      : moment
-                          .utc(this.state.empData.birthDate * 1000)
-                          .format("DD-MM-YYYY")
-                          .toString()}
-                  </h5>
-                  <h5>
-                    Struktur qurum:{" "}
-                    {isEmpty(this.state.empCurrentPos)
-                      ? ""
-                      : this.state.empCurrentPos.depTitle}
-                  </h5>
-                  <h5>
-                    İşə başladığı tarix:{" "}
-                    {this.state.empCurrentPos.startDate === 0
-                      ? ""
-                      : moment
-                          .utc(this.state.empCurrentPos.startDate * 1000)
-                          .format("DD-MM-YYYY")
-                          .toString()}
-                  </h5>
-                  <h5>
-                    Elektron poçt:{" "}
-                    {empContact.map((item) =>
-                      item.contactType === "Elektron poçt"
-                        ? item.contactText
-                        : ""
-                    )}
-                  </h5>
-                  <h5>
-                    Mobil telefon:
-                    {/* {empContact.map((item) =>
+function EmpProfile(props) {
+  const [empData, setEmpData] = useState({
+    empId: props.empId,
+    username: "",
+    // ... (initialize other properties)
+  });
 
-                    
-                      item.contactType === "Mobil" ? item.contactText : ""
-                  )} */}
-                  empContact.map((item))
-                  </h5>
-                  {/* <p>
-                                        qısa məlumat.....
-                                    </p> */}
-                </CardMedia>
-              </Grid>
-              <Grid item xs={10}>
-                <CardMedia profile square="true">
-                  <Accordion defaultExpanded={true}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <h3 style={{ color: "#0047b3" }}> Şəxsi məlumatlar </h3>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={2}>
-                        <Grid item xs={3}>
-                          <label htmlFor="fname">Adı</label>
-                          <input
-                            disabled="disabled"
-                            value={this.state.empData.firstName}
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="lname">Soyadı</label>
-                          <input
-                            disabled="disabled"
-                            value={this.state.empData.lastName}
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="fname">Ata adı</label>
-                          <input
-                            disabled="disabled"
-                            value={this.state.empData.fatherName}
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="username">İstifadəçi adı</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.username)
-                                ? ""
-                                : this.state.empData.username
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={4}>
-                          <label htmlFor="citizenship">Vətəndaşlığı</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.citizenship)
-                                ? ""
-                                : this.state.empData.citizenship
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={8}>
-                          <label htmlFor="regAddress">Qeydiyyat ünvanı</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.regAddress)
-                                ? ""
-                                : this.state.empData.regAddress.addressTitle
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="birthDate">Doğum tarixi</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              this.state.empData.birthDate === 0
-                                ? ""
-                                : moment
-                                    .utc(this.state.empData.birthDate * 1000)
-                                    .format("DD-MM-YYYY")
-                                    .toString()
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="identityDoc">
-                            Vətəndaşlığı təsdiq edən sənəd
-                          </label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              this.state.empData.identityDoc
-                                ? this.state.empData.identityDoc
-                                : ""
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="cardNo">Şəxsiyyət vəsiqəsi №</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              this.state.empData.cardNo
-                                ? this.state.empData.cardNo
-                                : ""
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="fin">Fin kodu</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              this.state.empData.fin
-                                ? this.state.empData.fin
-                                : ""
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="c1Code">1C kodu</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.c1Code)
-                                ? ""
-                                : this.state.empData.c1Code
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="authority">ŞV verən orqan</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              this.state.empData.authority
-                                ? this.state.empData.authority
-                                : ""
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="dateOfIssue">ŞV Verilmə Tarixi</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              this.state.empData.dateOfIssue === 0
-                                ? ""
-                                : moment
-                                    .utc(this.state.empData.dateOfIssue * 1000)
-                                    .format("DD-MM-YYYY")
-                                    .toString()
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="dateOfExpiry">ŞV Bitmə Tarixi</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              this.state.empData.dateOfExpiry === 0
-                                ? ""
-                                : moment
-                                    .utc(this.state.empData.dateOfExpiry * 1000)
-                                    .format("DD-MM-YYYY")
-                                    .toString()
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="gender">Cinsiyyəti</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              this.state.empData.gender
-                                ? this.state.empData.gender
-                                : ""
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="maritalStatus">Ailə vəziyyəti</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.maritalStatus)
-                                ? ""
-                                : this.state.empData.maritalStatus
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="militaryObliged">
-                            Hərbi mükəlləfiyyəti
-                          </label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              this.state.empData.militaryObliged
-                                ? this.state.empData.militaryObliged
-                                : ""
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <label htmlFor="dsmfCardNo">DSMF Kart №</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.dsmfCardNo)
-                                ? ""
-                                : this.state.empData.dsmfCardNo
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={4}>
-                          <label htmlFor="placeOfBirth">Doğulduğu yer</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.placeOfBirth)
-                                ? ""
-                                : this.state.empData.placeOfBirth.addressTitle
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={8}>
-                          <label htmlFor="curAddress">
-                            Faktiki yaşadığı ünvan
-                          </label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.curAddress)
-                                ? ""
-                                : this.state.empData.curAddress.addressTitle
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={7}>
-                          <label htmlFor="kvotaStatus">Kvota status</label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.kvotaStatus)
-                                ? []
-                                : this.state.empData.kvotaStatus.map(
-                                    (item) => item.familyStatusTitle
-                                  )
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid item xs={5}>
-                          <label htmlFor="xusMezStatus">
-                            Xüsusi məzuniyyət statusu
-                          </label>
-                          <input
-                            disabled="disabled"
-                            value={
-                              isEmpty(this.state.empData.xusMezStatus)
-                                ? ""
-                                : this.state.empData.xusMezStatus
-                            }
-                            style={inputStyle}
-                          />
-                        </Grid>
-                        <Grid container item xs={12} spacing={2}>
-                          <Grid item xs={12}>
-                            <h4>Uşaqları haqqında məlumat</h4>
-                          </Grid>
-                          <Table>
-                            <TableHead>
-                              <StyledTableRow>
-                                <TableCell>Cinsiyyyəti</TableCell>
-                                <TableCell align="right">
-                                  Doğum tarixi
-                                </TableCell>
-                                <TableCell align="right">Yaş</TableCell>
-                                <TableCell align="right">
-                                  Sağlamlıq məhdudiyyəti
-                                </TableCell>
-                              </StyledTableRow>
-                            </TableHead>
-                            <TableBody>
-                              {this.state.empChildren.map((item) =>
-                                this.getChildrenList(item)
-                              )}
-                            </TableBody>
-                          </Table>
-                        </Grid>
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                  <Accordion defaultExpanded={true}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <h3 style={{ color: "#0047b3", marginTop: 30 }}>
-                        {" "}
-                        İş məlumatları{" "}
-                      </h3>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={2}>
-                        <Grid container item xs={12} spacing={2}>
-                          <Table>
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Struktur qurum</TableCell>
-                                <TableCell align="right">Vəzifə</TableCell>
-                                <TableCell align="right">
-                                  Başladığı tarix
-                                </TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {empPos.map((row) => this.getPosList(row))}
-                            </TableBody>
-                          </Table>
-                        </Grid>
-                        <Grid item xs={12}>
-                          <h4>Staj məlumatları</h4>
-                        </Grid>
-                        <Table>
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Başladığı tarix</TableCell>
-                              <TableCell align="right">Son tarix</TableCell>
-                              <TableCell align="right">İl</TableCell>
-                              <TableCell align="right">Ay</TableCell>
-                              <TableCell align="right">Gün</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {this.state.empWorkExperience.map((item) =>
-                              this.getWorkExperienceList(item)
-                            )}
-                          </TableBody>
-                        </Table>
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                  <Accordion defaultExpanded={true}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <h3 style={{ color: "#0047b3", marginTop: 30 }}>
-                        {" "}
-                        Təhsil{" "}
-                      </h3>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={2}>
-                        <Grid container item xs={12} spacing={2}>
-                          <Grid item xs={12}>
-                            <h4>Təhsil məlumatları</h4>
-                          </Grid>
-                          <Table>
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Tarix</TableCell>
-                                <TableCell align="right">Növü</TableCell>
-                                <TableCell align="right">
-                                  Təhsil müəssisəsinin adı
-                                </TableCell>
-                                <TableCell align="right">İxtisas</TableCell>
-                                <TableCell align="right">Bal</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {empInst.map((row) => this.getEduList(row))}
-                            </TableBody>
-                          </Table>
-                        </Grid>
-                        <Grid container item xs={12} spacing={2}>
-                          <Grid item xs={12}>
-                            <h4>Keçdiyi kurslar</h4>
-                          </Grid>
-                          <Table>
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Kursun adı</TableCell>
-                                <TableCell align="right">Tarix</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {empCourse.map((row) => this.getCourseList(row))}
-                            </TableBody>
-                          </Table>
-                        </Grid>
-                        <Grid container item xs={12} spacing={2}>
-                          <Grid item xs={12}>
-                            <h4>Aldığı sertifikatlar</h4>
-                          </Grid>
-                          <Table>
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Qurum</TableCell>
-                                <TableCell align="right">
-                                  Sertifikatın adı
-                                </TableCell>
-                                <TableCell align="right">Bal</TableCell>
-                                <TableCell align="right">Tarix</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {empCertificate.map((row) =>
-                                this.getCertificateList(row)
-                              )}
-                            </TableBody>
-                          </Table>
-                        </Grid>
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                  <Accordion defaultExpanded={true}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <h3 style={{ color: "#0047b3", marginTop: 30 }}>
-                        {" "}
-                        Əlaqə{" "}
-                      </h3>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={2}>
-                        <Table>
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Kontakt növü</TableCell>
-                              <TableCell align="right">Kontakt</TableCell>
-                              <TableCell align="right">Qeyd</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {empContact.map((item) =>
-                              this.getContactList(item)
-                            )}
-                          </TableBody>
-                        </Table>
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                  <Accordion defaultExpanded={true}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <h3 style={{ color: "#0047b3", marginTop: 30 }}>
-                        {" "}
-                        Əlavə Biliklər{" "}
-                      </h3>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={2}>
-                        <Grid container item xs={5}>
-                          <Grid item xs={12}>
-                            <h4>Dil bilikləri</h4>
-                          </Grid>
-                          <Table>
-                            <TableBody>
-                              {this.state.langSkills.map((item) =>
-                                this.getLangList(item)
-                              )}
-                            </TableBody>
-                          </Table>
-                        </Grid>
-                        <Grid item xs={1} />
-                        <Grid container item xs={5}>
-                          <Grid item xs={12}>
-                            <h4>Kompyuter bacarıqları</h4>
-                          </Grid>
-                          <Table>
-                            <TableBody>
-                              {this.state.compSkills.map((item) =>
-                                this.getCompList(item)
-                              )}
-                            </TableBody>
-                          </Table>
-                        </Grid>
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                </CardMedia>
-                {/*</Card>*/}
-              </Grid>
-            </Grid>
-          </Grid>
-        </Card>
-        <Dialog
-          maxWidth={"sm"}
-          fullWidth={true}
-          onClose={this.handleClose}
-          aria-labelledby="customized-dialog-title"
-          open={this.state.open}
-        >
-          <DialogTitle id="customized-dialog-title" onClose={this.handleClose}>
-            Şəklin dəyişdirilməsi
-          </DialogTitle>
-          <DialogContent>
-            <ImageUpload
-              empId={this.empId}
-              whenUploaded={() => {
-                console.log("img uploaded");
-                this.loadProfileImg();
-                this.handleClose();
-              }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleClose} color="primary">
-              Bağla
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Fragment>
-    );
-  }
 
-  showHideSnackbar = (message, variant, show) => {
-    if (show === undefined) show = true;
-    if (variant === undefined) variant = "error";
-    this.setState(
-      Object.assign({}, this.state, {
-        snackBar: Object.assign({}, this.state.snackBar, {
-          show,
-          message,
-          variant,
-        }),
-        dataLoaded: true,
-      })
-    );
+  const [empPos, setEmpPos] = useState([]);
+  const [empContact, setEmpContact] = useState([]);
+  const [empChildren, setEmpChildren] = useState([]);
+  const [empWorkExperience, setEmpWorkExperience] = useState([]);
+
+  const [empEdu, setEmpEdu] = useState({
+    empInst: [],
+    empCourse: [],
+    empCertificate: [],
+  });
+  const [langSkills, setLangSkills] = useState([]);
+  const [compSkills, setCompSkills] = useState([]);
+
+  // ... (other state variables)
+
+  const [empCurrentPos, setEmpCurrentPos] = useState({
+    empPosId: 0,
+    depTitle: "",
+    posTitle: "",
+    startDate: 0,
+  });
+
+
+  const a = dayjs();
+  const imgRef = useRef(null);
+
+
+
+
+  const [open,setOpen] = useState(true)
+  // handle \
+  const handleClose = () => {
+    setOpen(false);
   };
 
-  handleClickOpen = (e) => {
-    e.preventDefault();
-    if (!UserHasAccessInfoId([172])) return;
-    this.setState({
-      open: true,
-    });
-  };
-
-  handleClose = () => {
-    this.setState({ open: false });
-  };
-
-  loadProfileImg() {
-    avrFetch(BACKEND_URL + "/api/User/imgbyid/" + this.empId)
+  const loadProfileImg = () => {
+    avrFetch(BACKEND_URL + "/api/User/imgbyid/" + empData.empId)
       .then(validateResponse)
       .then(readResponseAsBlob)
       .then((myBlob) => {
         const file = new Blob([myBlob], { type: "image/jpeg" });
         let fileUrl = (window.URL || window.webkitURL).createObjectURL(file);
-        this.imgRef.current.src = fileUrl;
+        imgRef.current.src = fileUrl;
       })
       .catch((reason) =>
-        this.setState(
-          Object.assign({}, this.state, {
-            loading: false,
-            errors: reason.message,
-          })
-        )
+        setEmpData((prevEmpData) => ({
+          ...prevEmpData,
+          loading: false,
+          errors: reason.message,
+        }))
       );
-  }
-
-  loadEmpData = () => {
-    avrFetch(BACKEND_URL + "/api/Employee/GetProfileData/" + this.empId)
+  };
+  const loadEmpData = () => {
+    const today = new Date()
+    avrFetch(BACKEND_URL + "/api/Employee/GetProfileData/" + empData.empId)
       .then(validateResponse)
       .then(readResponseAsJSON)
       .then((value) => {
         if (!isEmpty(value) && value.success === true) {
-          //console.log('value: ', value);
-          //const masterData = value.data.masterData;
-          const employeeData = value.data;
-
-          //this.dataLoaded = true;
-          if (this.empId > 0)
-            this.setState(
-              Object.assign({}, this.state, { empData: employeeData })
-            );
+          const employeeData = { ...value.data };
+          if (empData.empId > 0) {
+            setEmpData((prevEmpData) => ({
+              ...prevEmpData,
+              employeeData,
+            }));
+          }
         } else {
-          this.setState4SnackBarData(value.ResponseMessage, "error");
+          // Handle error or update state accordingly
+          // For example: setErrorState(value.ResponseMessage);
         }
       })
       .catch((reason) => {
-        //console.log(reason);
-      });
+        // Handle error
+        // For example: setErrorState(reason.message);
+      }).finally(console.log('empData after fetch', new Date(empData?.employeeData?.birthDate * 1000))
+      )
   };
 
-  loadCurrentEmpPos = () => {
+
+  const loadEmpPos = () => {
     avrFetch(
-      BACKEND_URL + "/api/EmpPosition/GetEmpPosIsLast?empId=" + this.empId
+      BACKEND_URL + "/api/EmpPosition/GetPositionsByEmpId?empId=" + empData.empId
     )
       .then(validateResponse)
       .then(readResponseAsJSON)
       .then((value) => {
         if (!isEmpty(value) && value.success === true) {
-          this.setState(
-            Object.assign({}, this.state, {
-              empCurrentPos: Object.assign({}, this.state.empCurrentPos, {
-                empPosId: value.data.empPosId,
-                depTitle: value.data.dep.label,
-                posTitle: value.data.pos.label,
-                startDate: value.data.startDate,
-              }),
-            })
-          );
+          const updatedEmpPos = value.data.map((item) => ({
+            empPosId: item.empPosId,
+            depTitle: item.dep.label,
+            posTitle: item.pos.label,
+            startDate: item.startDate,
+          }));
+          setEmpPos(updatedEmpPos);
         } else {
-          this.showHideSnackbar(value.responseMessage, "error", true);
+          // Handle error or update state accordingly
+          // For example: setErrorState(value.responseMessage);
+        }
+      })
+      .catch((reason) => {
+        // Handle error
+        // For example: setErrorState(reason.message);
+      });
+  };
+
+  const loadEmpContact = () => {
+    avrFetch(BACKEND_URL + "/api/Contact/GetContactByEmpId?empId=" + empData.empId)
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((value) => {
+        if (!isEmpty(value) && value.success === true) {
+          const updatedEmpContact = value.data.map((item) => ({
+            contactId: item.contactId,
+            contactType: item.contactType.label,
+            contactText: item.contactText,
+            note: item.note,
+          }));
+          setEmpContact(updatedEmpContact);
+        } else {
+          // Handle error or update state accordingly
+          // For example: setErrorState(value.message);
+        }
+      })
+      .catch((reason) => {
+        // Handle error
+        // For example: setErrorState(reason.message);
+      });
+  };
+
+
+  const loadEmpChildren = () => {
+    avrFetch(
+      BACKEND_URL +
+      "/api/EmpChildren/GetChildrenByMotherEmpId?empId=" +
+      empData.empId
+    )
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((value) => {
+        if (!isEmpty(value) && value.success === true) {
+          const updatedEmpChildren = value.data.map((item) => ({
+            empChildId: item.empChildId,
+            gender: item.gender.label,
+            birthDate: item.birthDate,
+            yash: item.yash,
+            isSaglamMehdudiyyet: item.isSaglamMehdudiyyet,
+          }));
+          setEmpChildren(updatedEmpChildren);
+        } else {
+          // Handle error or update state accordingly
+          // For example: setErrorState(value.responseMessage);
+        }
+      })
+      .catch((reason) => {
+        // Handle error
+        // For example: setErrorState(reason.message);
+      });
+  };
+
+  const loadEmpWorkExperience = () => {
+    avrFetch(
+      BACKEND_URL +
+      "/api/EmpWorkExperience/GetWorkExperienceByEmpId?empId=" +
+      empData.empId
+    )
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((value) => {
+        if (!isEmpty(value) && value.success === true) {
+          const updatedEmpWorkExperience = value.data.map((item) => ({
+            empWorkExpId: item.empWorkExpId,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            ymd: item.ymd,
+          }));
+          setEmpWorkExperience(updatedEmpWorkExperience);
+        }
+      })
+      .catch((reason) => {
+        // Handle error
+        // For example: setErrorState(reason.message);
+      });
+  };
+
+
+  const loadEmpEdu = () => {
+    avrFetch(
+      BACKEND_URL + "/api/Education/GetEducationByEmpId?empId=" + empData.empId
+    )
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((value) => {
+        if (!isEmpty(value) && value.success === true) {
+          const updatedEmpInst = value.data.map((item) => ({
+            empEduInfoId: item.empEduInfoId,
+            eduInstName: item.eduInstName,
+            eduInstType:
+              item.eduInstType === null ? "" : item.eduInstType.label,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            score: item.score,
+            ixtisas: item.ixtisas,
+          }));
+
+          setEmpEdu((prevEmpEdu) => ({
+            ...prevEmpEdu,
+            empInst: [...prevEmpEdu.empInst, ...updatedEmpInst],
+          }));
+        }
+      })
+      .catch((reason) => {
+        // Handle error
+        // For example: setErrorState(reason.message);
+      });
+  };
+  const loadEmpCourse = () => {
+    avrFetch(BACKEND_URL + "/api/EmpCource/GetCourcesEmpId?empId=" + empData.empId)
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((value) => {
+        if (!isEmpty(value) && value.success === true) {
+          const updatedEmpCourse = value.data.map((item) => ({
+            courseId: item.id,
+            title: item.title,
+            beginDate: item.beginDate,
+            endDate: item.endDate,
+          }));
+
+          setEmpEdu((prevEmpEdu) => ({
+            ...prevEmpEdu,
+            empCourse: [...prevEmpEdu.empCourse, ...updatedEmpCourse],
+          }));
+        }
+      })
+      .catch((reason) => {
+        // Handle error
+        // For example: setErrorState(reason.message);
+      });
+  };
+  const loadLangSkills = () => {
+    avrFetch(
+      BACKEND_URL + "/api/LangSkill/GetLangSkillsEmpId?empId=" + empData.empId
+    )
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((value) => {
+        if (!isEmpty(value) && value.success === true) {
+          const updatedLangSkills = value.data.map((item) => ({
+            langId: item.id,
+            lang: item.lang.label,
+            langLevel: item.langLevel.label,
+          }));
+
+          setLangSkills((prevLangSkills) => [
+            ...prevLangSkills,
+            ...updatedLangSkills,
+          ]);
+        }
+      })
+      .catch((reason) => {
+        // Handle error
+        // For example: setErrorState(reason.message);
+      });
+  };
+
+  const loadEmpCertificate = () => {
+    avrFetch(
+      BACKEND_URL +
+      "/api/EmpCertificate/GetCertificatesByEmpId?empId=" +
+      empData.empId
+    )
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((value) => {
+        if (!isEmpty(value) && value.success === true) {
+          const updatedEmpCertificate = value.data.map((item) => ({
+            certificateId: item.id,
+            orgTitle: item.orgTitle,
+            title: item.title,
+            grade: item.grade,
+            date: item.date,
+          }));
+
+          setEmpEdu((prevEmpEdu) => ({
+            ...prevEmpEdu,
+            empCertificate: [...prevEmpEdu.empCertificate, ...updatedEmpCertificate],
+          }));
+        }
+      })
+      .catch((reason) => {
+        // Handle error
+        // For example: setErrorState(reason.message);
+      });
+  };
+  const loadCompSkills = () => {
+    avrFetch(
+      BACKEND_URL + "/api/CompSkill/GetCompSkillsByEmpId?empId=" + empData.empId
+    )
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((value) => {
+        if (!isEmpty(value) && value.success === true) {
+          const updatedCompSkills = value.data.map((item) => ({
+            compId: item.id,
+            comp: item.comp.label,
+            compLevel: item.compLevel.label,
+          }));
+
+          setCompSkills((prevCompSkills) => [
+            ...prevCompSkills,
+            ...updatedCompSkills,
+          ]);
+        }
+      })
+      .catch((reason) => {
+        // Handle error
+        // For example: setErrorState(reason.message);
+      });
+  };
+  const loadCurrentEmpPos = () => {
+    avrFetch(
+      BACKEND_URL + "/api/EmpPosition/GetEmpPosIsLast?empId=" + empData.empId
+    )
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((value) => {
+        if (!isEmpty(value) && value.success === true) {
+          setEmpCurrentPos({
+            empPosId: value.data.empPosId,
+            depTitle: value.data.dep.label,
+            posTitle: value.data.pos.label,
+            startDate: value.data.startDate,
+          });
+        } else {
+          // Handle error
+          // For example: setErrorState(value.responseMessage);
         }
       })
       .catch((err) => {
-        this.showHideSnackbar(err.message, "error", true);
+        // Handle error
+        // For example: setErrorState(err.message);
       });
   };
+  
+  useEffect(() => {
+    loadEmpData();
+    loadProfileImg();
+    loadEmpPos();
+    loadEmpEdu();
+    loadEmpCourse();
+    loadEmpCertificate();
+    loadEmpContact();
+    loadLangSkills();
+    loadCompSkills();
+    loadEmpChildren();
+    loadCurrentEmpPos();
+    loadEmpWorkExperience();
+  }, []);
 
-  loadEmpEdu = () => {
-    avrFetch(
-      BACKEND_URL + "/api/Education/GetEducationByEmpId?empId=" + this.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          value.data.map(
-            (
-              item //(item.empEduInfoId, item.eduInstType === null ? '' : item.eduInstType.label, item.eduInstName, item.ixtisas, item.score,  item.startDate, item.endDate, this.handleTableAction));
-            ) =>
-              this.setState((prevState) =>
-                Object.assign({}, this.state, {
-                  empEdu: Object.assign({}, this.state.empEdu, {
-                    empInst: [
-                      ...prevState.empEdu.empInst,
-                      {
-                        empEduInfoId: item.empEduInfoId,
-                        eduInstName: item.eduInstName,
-                        eduInstType:
-                          item.eduInstType === null
-                            ? ""
-                            : item.eduInstType.label,
-                        startDate: item.startDate,
-                        endDate: item.endDate,
-                        score: item.score,
-                        ixtisas: item.ixtisas,
-                      },
-                    ],
-                  }),
-                })
-              )
-          );
-        }
-      })
-      .catch((reason) => {
-        this.showHideSnackbar(reason.message, "error", true);
-      });
-  };
+  const empCourse = empEdu.empCourse;
+  const empCertificate = empEdu.empCertificate;
+  const empContactRef = empContact;
+  const empPosRef = empPos;
+  const empInst = empEdu.empInst
+  const {employeeData : emp_data} = empData;
+  return (
+    <>
+      <Card style={{ marginTop: 0 }}>
+        <Grid style={{ flexGrow: 1, padding: 0 }}>
+          <Grid
+            item
+            xs={12}
+            container
+            spacing={0}
+            alignItems={"flex-start"}
+            direction={"row"}
+            justifyContent={"flex-start"}
+          >
+            <Grid item xs={2} />
+            <Grid item xs={10}>
+              <h1 style={{ color: "" }}>
+                {emp_data?.firstName} {emp_data?.lastName}{" "}
+              </h1>{" "}
+              {/*style={{color: '#0052cc'}}*/}
+              <h2 style={{ color: "" }}>
+                {isEmpty(empCurrentPos)
+                  ? ""
+                  : empCurrentPos.posTitle}
+              </h2>
+              <p style={{ color: "red" }}>
+                {empData.stateId === 2 ? "işdən azad olunub" : ""}
+              </p>
+            </Grid>
+            <Grid item xs={2}>
+              <CardAvatar profile square="true">
+                <a href="#pablo" onClick={(e) => handleClickOpen(e)}>
+                  <img
+                    ref={imgRef}
+                    src="http://www.markweb.in/primehouseware/images/noimage.png"
+                    alt="..."
+                  />
+                </a>
+              </CardAvatar>
+              <CardMedia
+                profile
+                square="true"
+                style={{ justifyContent: "center" }}
+              >
+                <h5>İstifadəçi adı: {empData?.employeeData?.username}</h5>
+                <h5>
+                  Doğum tarixi:{" "}
+                  {empData.birthDate === 0
+                    ? ""
+                    : new Date(empData?.employeeData?.birthDate * 1000)
+                      .toDateString()}
+                </h5>
+                <h5>
+                  Struktur qurum:{" "}
+                  {isEmpty(empCurrentPos)
+                    ? ""
+                    : empCurrentPos.depTitle}
+                </h5>
+                <h5>
+                  İşə başladığı tarix:{" "}
+                  {empCurrentPos.startDate === 0
+                    ? ""
+                    : a
+                      .utc(empCurrentPos.startDate * 1000)
+                      .format("DD-MM-YYYY")
+                      .toString()}
+                </h5>
+                <h5>
+                  Elektron poçt:{" "}
+                  {empContact.map((item) =>
+                    item.contactType === "Elektron poçt"
+                      ? item.contactText
+                      : ""
+                  )}
+                </h5>
+                <h5>
+                  Mobil telefon:
+                  {/* {empContact.map((item) =>
 
-  loadEmpCourse = () => {
-    avrFetch(BACKEND_URL + "/api/EmpCource/GetCourcesEmpId?empId=" + this.empId)
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          value.data.map(
-            (
-              item //item.id, item.title, item.beginDate, item.endDate, this.handleTableAction));
-            ) =>
-              this.setState((prevState) =>
-                Object.assign({}, this.state, {
-                  empEdu: Object.assign({}, this.state.empEdu, {
-                    empCourse: [
-                      ...prevState.empEdu.empCourse,
-                      {
-                        courseId: item.id,
-                        title: item.title,
-                        beginDate: item.beginDate,
-                        endDate: item.endDate,
-                      },
-                    ],
-                  }),
-                })
-              )
-          );
-        }
-      })
-      .catch((reason) => {
-        this.showHideSnackbar(reason.message, "error", true);
-      });
-  };
-
-  loadEmpCertificate = () => {
-    avrFetch(
-      BACKEND_URL +
-        "/api/EmpCertificate/GetCertificatesByEmpId?empId=" +
-        this.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          value.data.map(
-            (
-              item //createData(item.id, item.orgTitle, item.title, item.grade, item.date, this.handleTableAction));
-            ) =>
-              this.setState((prevState) =>
-                Object.assign({}, this.state, {
-                  empEdu: Object.assign({}, this.state.empEdu, {
-                    empCertificate: [
-                      ...prevState.empEdu.empCertificate,
-                      {
-                        certificateId: item.id,
-                        orgTitle: item.orgTitle,
-                        title: item.title,
-                        grade: item.grade,
-                        date: item.date,
-                      },
-                    ],
-                  }),
-                })
-              )
-          );
-        }
-      })
-      .catch((reason) => {
-        this.showHideSnackbar(reason.message, "error", true);
-      });
-  };
-
-  loadEmpContact = () => {
-    avrFetch(BACKEND_URL + "/api/Contact/GetContactByEmpId?empId=" + this.empId)
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          value.data.map(
-            (
-              item //createData(item.contactId, item.contactType.label, item.contactText, item.note, item.isVisible, this.handleTableAction));
-            ) =>
-              this.setState((prevState) =>
-                Object.assign({}, this.state, {
-                  empContact: [
-                    ...prevState.empContact,
-                    {
-                      contactId: item.contactId,
-                      contactType: item.contactType.label,
-                      contactText: item.contactText,
-                      note: item.note,
-                    },
-                  ],
-                })
-              )
-          );
-        } else {
-          this.showHideSnackbar(value.message, "info", true);
-        }
-      })
-      .catch((reason) => {
-        this.showHideSnackbar(reason.message, "error", true);
-      });
-  };
-
-  loadLangSkills = () => {
-    avrFetch(
-      BACKEND_URL + "/api/LangSkill/GetLangSkillsEmpId?empId=" + this.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          value.data.map(
-            (
-              item //createData(item.id, item.lang.label, item.langLevel.label, this.handleTableAction));
-            ) =>
-              this.setState((prevState) =>
-                Object.assign({}, this.state, {
-                  langSkills: [
-                    ...prevState.langSkills,
-                    {
-                      langId: item.id,
-                      lang: item.lang.label,
-                      langLevel: item.langLevel.label,
-                    },
-                  ],
-                })
-              )
-          );
-        }
-      })
-      .catch((reason) => {
-        this.showHideSnackbar(reason.message, "error", true);
-      });
-  };
-
-  loadCompSkills = () => {
-    avrFetch(
-      BACKEND_URL + "/api/CompSkill/GetCompSkillsByEmpId?empId=" + this.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          value.data.map(
-            (
-              item //createData(item.id, item.comp.label, item.compLevel.label, this.handleTableAction));
-            ) =>
-              this.setState((prevState) =>
-                Object.assign({}, this.state, {
-                  compSkills: [
-                    ...prevState.compSkills,
-                    {
-                      compId: item.id,
-                      comp: item.comp.label,
-                      compLevel: item.compLevel.label,
-                    },
-                  ],
-                })
-              )
-          );
-        }
-      })
-      .catch((reason) => {
-        this.showHideSnackbar(reason.message, "error", true);
-      });
-  };
-
-  loadEmpChildren = () => {
-    avrFetch(
-      BACKEND_URL +
-        "/api/EmpChildren/GetChildrenByMotherEmpId?empId=" +
-        this.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          value.data.map(
-            (
-              item //createData(item.empChildId, item.gender.label, item.birthDate, item.yash, item.isSaglamMehdudiyyet, this.handleTableAction));
-            ) =>
-              this.setState((prevState) =>
-                Object.assign({}, this.state, {
-                  empChildren: [
-                    ...prevState.empChildren,
-                    {
-                      empChildId: item.empChildId,
-                      gender: item.gender.label,
-                      birthDate: item.birthDate,
-                      yash: item.yash,
-                      isSaglamMehdudiyyet: item.isSaglamMehdudiyyet,
-                    },
-                  ],
-                })
-              )
-          );
-        } else {
-          this.showHideSnackbar(value.responseMessage, "error", true);
-        }
-      })
-      .catch((reason) => {
-        this.showHideSnackbar(reason.message, "error", true);
-      });
-  };
-
-  loadEmpPos = () => {
-    avrFetch(
-      BACKEND_URL + "/api/EmpPosition/GetPositionsByEmpId?empId=" + this.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          value.data.map((item) =>
-            this.setState((prevState) =>
-              Object.assign({}, this.state, {
-                empPos: [
-                  ...prevState.empPos,
-                  {
-                    empPosId: item.empPosId,
-                    depTitle: item.dep.label,
-                    posTitle: item.pos.label,
-                    startDate: item.startDate,
-                  },
-                ],
-              })
-            )
-          );
-        } else {
-          this.showHideSnackbar(value.responseMessage, "error", true);
-        }
-      })
-      .catch((reason) => {
-        this.showHideSnackbar(reason.message, "error", true);
-      });
-  };
-
-  loadEmpWorkExperience = () => {
-    avrFetch(
-      BACKEND_URL +
-        "/api/EmpWorkExperience/GetWorkExperienceByEmpId?empId=" +
-        this.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          value.data.map(
-            (
-              item //createData(item.empWorkExpId, item.orgName, item.depName, item.posName, item.startDate, item.endDate, item.ymd, this.handleTableAction));
-            ) =>
-              this.setState((prevState) =>
-                Object.assign({}, this.state, {
-                  empWorkExperience: [
-                    ...prevState.empWorkExperience,
-                    {
-                      empWorkExpId: item.empWorkExpId,
-                      startDate: item.startDate,
-                      endDate: item.endDate,
-                      ymd: item.ymd,
-                    },
-                  ],
-                })
-              )
-          );
-        }
-      })
-      .catch((reason) => {
-        this.showHideSnackbar(reason.message, "error", true);
-      });
-  };
-
-  getEduList(value) {
-    const tarixs =
-      value.startDate === 0
-        ? ""
-        : moment
-            .utc(value.startDate * 1000)
-            .format("DD-MM-YYYY")
-            .toString() + " / ";
-    const tarixe =
-      value.endDate === 0
-        ? ""
-        : moment
-            .utc(value.endDate * 1000)
-            .format("DD-MM-YYYY")
-            .toString();
-    return (
-      <TableRow key={value.empEduInfoId}>
-        <TableCell component="th" scope="row">
-          {tarixs + tarixe}
-        </TableCell>
-        <TableCell align="right">{value.eduInstType}</TableCell>
-        <TableCell align="right">{value.eduInstName}</TableCell>
-        <TableCell align="right">{value.ixtisas}</TableCell>
-        <TableCell align="right">{value.score}</TableCell>
-      </TableRow>
-    );
-  }
-
-  getCourseList(value) {
-    const tarixs =
-      value.beginDate === 0
-        ? ""
-        : moment
-            .utc(value.beginDate * 1000)
-            .format("DD-MM-YYYY")
-            .toString() + " / ";
-    const tarixe =
-      value.endDate === 0
-        ? ""
-        : moment
-            .utc(value.endDate * 1000)
-            .format("DD-MM-YYYY")
-            .toString();
-    return (
-      <TableRow key={value.courseId}>
-        <TableCell component="th" scope="row">
-          {value.title}
-        </TableCell>
-        <TableCell align="right">{tarixs + tarixe}</TableCell>
-      </TableRow>
-    );
-  }
-
-  getCertificateList(value) {
-    const tarix =
-      value.date === 0
-        ? ""
-        : moment
-            .utc(value.date * 1000)
-            .format("DD-MM-YYYY")
-            .toString();
-    return (
-      <TableRow key={value.certificateId}>
-        <TableCell component="th" scope="row">
-          {value.orgTitle}
-        </TableCell>
-        <TableCell align="right">{value.title}</TableCell>
-        <TableCell align="right">{value.grade}</TableCell>
-        <TableCell align="right">{tarix}</TableCell>
-      </TableRow>
-    );
-  }
-
-  getContactList(value) {
-    return (
-      <TableRow key={value.contactId}>
-        <TableCell component="th" scope="row">
-          {value.contactType}
-        </TableCell>
-        <TableCell align="right">{value.contactText}</TableCell>
-        <TableCell align="right">{value.note}</TableCell>
-      </TableRow>
-    );
-  }
-
-  getLangList(value) {
-    return (
-      <TableRow key={value.langId}>
-        <TableCell component="th" scope="row">
-          {value.lang}
-        </TableCell>
-        <TableCell align="right">{value.langLevel}</TableCell>
-      </TableRow>
-    );
-  }
-
-  getCompList(value) {
-    return (
-      <TableRow key={value.compId}>
-        <TableCell component="th" scope="row">
-          {value.comp}
-        </TableCell>
-        <TableCell align="right">{value.compLevel}</TableCell>
-      </TableRow>
-      // <Grid container item xs={12} spacing={16}>
-      //     <Grid item xs={5}>
-      //         <input disabled="disabled" value={value.comp} style={inputStyle}/>
-      //     </Grid>
-      //     <Grid item xs={5}>
-      //         <input disabled="disabled" value={value.compLevel} style={inputStyle}/>
-      //     </Grid>
-      // </Grid>
-    );
-  }
-
-  getChildrenList(value) {
-    const ageTitle =
-      value.yash.year > 0
-        ? value.yash.year + " yaş"
-        : value.yash.month > 0
-        ? value.yash.month + " aylıq"
-        : value.yash.day > 0
-        ? value.yash.day + " gün"
-        : "";
-    return (
-      <TableRow key={value.empChildId}>
-        <TableCell component="th" scope="row">
-          {value.gender}
-        </TableCell>
-        <TableCell align="right">
-          {value.birthDate === 0
-            ? ""
-            : moment
-                .utc(value.birthDate * 1000)
-                .format("DD-MM-YYYY")
-                .toString()}
-        </TableCell>
-        <TableCell align="right">{ageTitle}</TableCell>
-        <TableCell align="right">
-          {value.isSaglamMehdudiyyet ? "VAR" : "YOXDUR"}
-        </TableCell>
-      </TableRow>
-    );
-  }
-
-  getPosList(value) {
-    return (
-      <TableRow key={value.empPosId}>
-        <TableCell component="th" scope="row">
-          {value.depTitle}
-        </TableCell>
-        <TableCell align="right">{value.posTitle}</TableCell>
-        <TableCell align="right">
-          {value.startDate === 0
-            ? "..."
-            : moment
-                .utc(value.startDate * 1000)
-                .format("DD-MM-YYYY")
-                .toString()}
-        </TableCell>
-      </TableRow>
-    );
-  }
-
-  getWorkExperienceList(value) {
-    return (
-      <TableRow key={value.empWorkExpId}>
-        <TableCell component="th" scope="row">
-          {value.startDate === 0
-            ? ""
-            : moment
-                .utc(value.startDate * 1000)
-                .format("DD-MM-YYYY")
-                .toString()}
-        </TableCell>
-        <TableCell align="right">
-          {value.endDate === 0
-            ? ""
-            : moment
-                .utc(value.endDate * 1000)
-                .format("DD-MM-YYYY")
-                .toString()}
-        </TableCell>
-        <TableCell align="right">{value.ymd.year}</TableCell>
-        <TableCell align="right">{value.ymd.month}</TableCell>
-        <TableCell align="right">{value.ymd.day}</TableCell>
-      </TableRow>
-    );
-  }
+                
+                  item.contactType === "Mobil" ? item.contactText : ""
+              )} */}
+                  empContact.map((item))
+                </h5>
+                {/* <p>
+                                    qısa məlumat.....
+                                </p> */}
+              </CardMedia>
+            </Grid>
+            <Grid item xs={10}>
+              <CardMedia profile square="true">
+                <Accordion defaultExpanded={true}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <h3 style={{ color: "#0047b3" }}> Şəxsi məlumatlar </h3>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={2}>
+                      <Grid item xs={3}>
+                        <label htmlFor="fname">Adı</label>
+                        <input
+                          disabled="disabled"
+                          value={empData.firstName}
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="lname">Soyadı</label>
+                        <input
+                          disabled="disabled"
+                          value={empData.lastName}
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="fname">Ata adı</label>
+                        <input
+                          disabled="disabled"
+                          value={empData.fatherName}
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="username">İstifadəçi adı</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.username)
+                              ? ""
+                              : empData.username
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <label htmlFor="citizenship">Vətəndaşlığı</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.citizenship)
+                              ? ""
+                              : empData.citizenship
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={8}>
+                        <label htmlFor="regAddress">Qeydiyyat ünvanı</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.regAddress)
+                              ? ""
+                              : empData.regAddress.addressTitle
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="birthDate">Doğum tarixi</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            empData.birthDate === 0
+                              ? ""
+                              : a
+                                .utc(empData.birthDate * 1000)
+                                .format("DD-MM-YYYY")
+                                .toString()
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="identityDoc">
+                          Vətəndaşlığı təsdiq edən sənəd
+                        </label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            empData.identityDoc
+                              ? empData.identityDoc
+                              : ""
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="cardNo">Şəxsiyyət vəsiqəsi №</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            empData.cardNo
+                              ? empData.cardNo
+                              : ""
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="fin">Fin kodu</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            empData.fin
+                              ? empData.fin
+                              : ""
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="c1Code">1C kodu</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.c1Code)
+                              ? ""
+                              : empData.c1Code
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="authority">ŞV verən orqan</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            empData.authority
+                              ? empData.authority
+                              : ""
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="dateOfIssue">ŞV Verilmə Tarixi</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            empData.dateOfIssue === 0
+                              ? ""
+                              : a
+                                .utc(empData.dateOfIssue * 1000)
+                                .format("DD-MM-YYYY")
+                                .toString()
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="dateOfExpiry">ŞV Bitmə Tarixi</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            empData.dateOfExpiry === 0
+                              ? ""
+                              : a
+                                .utc(empData.dateOfExpiry * 1000)
+                                .format("DD-MM-YYYY")
+                                .toString()
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="gender">Cinsiyyəti</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            empData.gender
+                              ? empData.gender
+                              : ""
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="maritalStatus">Ailə vəziyyəti</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.maritalStatus)
+                              ? ""
+                              : empData.maritalStatus
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="militaryObliged">
+                          Hərbi mükəlləfiyyəti
+                        </label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            empData.militaryObliged
+                              ? empData.militaryObliged
+                              : ""
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <label htmlFor="dsmfCardNo">DSMF Kart №</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.dsmfCardNo)
+                              ? ""
+                              : empData.dsmfCardNo
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <label htmlFor="placeOfBirth">Doğulduğu yer</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.placeOfBirth)
+                              ? ""
+                              : empData.placeOfBirth.addressTitle
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={8}>
+                        <label htmlFor="curAddress">
+                          Faktiki yaşadığı ünvan
+                        </label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.curAddress)
+                              ? ""
+                              : empData.curAddress.addressTitle
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={7}>
+                        <label htmlFor="kvotaStatus">Kvota status</label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.kvotaStatus)
+                              ? []
+                              : empData.kvotaStatus.map(
+                                (item) => item.familyStatusTitle
+                              )
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid item xs={5}>
+                        <label htmlFor="xusMezStatus">
+                          Xüsusi məzuniyyət statusu
+                        </label>
+                        <input
+                          disabled="disabled"
+                          value={
+                            isEmpty(empData.xusMezStatus)
+                              ? ""
+                              : empData.xusMezStatus
+                          }
+                          style={inputStyle}
+                        />
+                      </Grid>
+                      <Grid container item xs={12} spacing={2}>
+                        <Grid item xs={12}>
+                          <h4>Uşaqları haqqında məlumat</h4>
+                        </Grid>
+                        <Table>
+                          <TableHead>
+                            <StyledTableRow>
+                              <TableCell>Cinsiyyyəti</TableCell>
+                              <TableCell align="right">
+                                Doğum tarixi
+                              </TableCell>
+                              <TableCell align="right">Yaş</TableCell>
+                              <TableCell align="right">
+                                Sağlamlıq məhdudiyyəti
+                              </TableCell>
+                            </StyledTableRow>
+                          </TableHead>
+                          <TableBody>
+                            {empChildren.map((item) =>
+                              getChildrenList(item)
+                            )}
+                          </TableBody>
+                        </Table>
+                      </Grid>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+                <Accordion defaultExpanded={true}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                      {" "}
+                      İş məlumatları{" "}
+                    </h3>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={2}>
+                      <Grid container item xs={12} spacing={2}>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Struktur qurum</TableCell>
+                              <TableCell align="right">Vəzifə</TableCell>
+                              <TableCell align="right">
+                                Başladığı tarix
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {empPos.map((row) => getPosList(row))}
+                          </TableBody>
+                        </Table>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <h4>Staj məlumatları</h4>
+                      </Grid>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Başladığı tarix</TableCell>
+                            <TableCell align="right">Son tarix</TableCell>
+                            <TableCell align="right">İl</TableCell>
+                            <TableCell align="right">Ay</TableCell>
+                            <TableCell align="right">Gün</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {empWorkExperience.map((item) =>
+                            getWorkExperienceList(item)
+                          )}
+                        </TableBody>
+                      </Table>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+                <Accordion defaultExpanded={true}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                      {" "}
+                      Təhsil{" "}
+                    </h3>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={2}>
+                      <Grid container item xs={12} spacing={2}>
+                        <Grid item xs={12}>
+                          <h4>Təhsil məlumatları</h4>
+                        </Grid>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Tarix</TableCell>
+                              <TableCell align="right">Növü</TableCell>
+                              <TableCell align="right">
+                                Təhsil müəssisəsinin adı
+                              </TableCell>
+                              <TableCell align="right">İxtisas</TableCell>
+                              <TableCell align="right">Bal</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {empInst.map((row) => getEduList(row))}
+                          </TableBody>
+                        </Table>
+                      </Grid>
+                      <Grid container item xs={12} spacing={2}>
+                        <Grid item xs={12}>
+                          <h4>Keçdiyi kurslar</h4>
+                        </Grid>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Kursun adı</TableCell>
+                              <TableCell align="right">Tarix</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {empCourse.map((row) => getCourseList(row))}
+                          </TableBody>
+                        </Table>
+                      </Grid>
+                      <Grid container item xs={12} spacing={2}>
+                        <Grid item xs={12}>
+                          <h4>Aldığı sertifikatlar</h4>
+                        </Grid>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Qurum</TableCell>
+                              <TableCell align="right">
+                                Sertifikatın adı
+                              </TableCell>
+                              <TableCell align="right">Bal</TableCell>
+                              <TableCell align="right">Tarix</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {empCertificate.map((row) =>
+                              getCertificateList(row)
+                            )}
+                          </TableBody>
+                        </Table>
+                      </Grid>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+                <Accordion defaultExpanded={true}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                      {" "}
+                      Əlaqə{" "}
+                    </h3>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={2}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Kontakt növü</TableCell>
+                            <TableCell align="right">Kontakt</TableCell>
+                            <TableCell align="right">Qeyd</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {empContact.map((item) =>
+                            getContactList(item)
+                          )}
+                        </TableBody>
+                      </Table>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+                <Accordion defaultExpanded={true}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                      {" "}
+                      Əlavə Biliklər{" "}
+                    </h3>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={2}>
+                      <Grid container item xs={5}>
+                        <Grid item xs={12}>
+                          <h4>Dil bilikləri</h4>
+                        </Grid>
+                        <Table>
+                          <TableBody>
+                            {langSkills.map((item) =>
+                              getLangList(item)
+                            )}
+                          </TableBody>
+                        </Table>
+                      </Grid>
+                      <Grid item xs={1} />
+                      <Grid container item xs={5}>
+                        <Grid item xs={12}>
+                          <h4>Kompyuter bacarıqları</h4>
+                        </Grid>
+                        <Table>
+                          <TableBody>
+                            {compSkills.map((item) =>
+                              getCompList(item)
+                            )}
+                          </TableBody>
+                        </Table>
+                      </Grid>
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+              </CardMedia>
+              {/*</Card>*/}
+            </Grid>
+          </Grid>
+        </Grid>
+      </Card>
+      {/* <Dialog
+        maxWidth={"sm"}
+        fullWidth={true}
+        onClose={handleClose}
+        aria-labelledby="customized-dialog-title"
+        open={open}
+      >
+        <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+          Şəklin dəyişdirilməsi
+        </DialogTitle>
+        <DialogContent>
+          <ImageUpload
+            empId={empData.empId}
+            whenUploaded={() => {
+              console.log("img uploaded");
+              loadProfileImg();
+              handleClose();
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Bağla
+          </Button>
+        </DialogActions>
+      </Dialog> */}
+    </>
+  );
 }
 
-export default (EmpProfile);
+
+function getEduList(value) {
+  const tarixs =
+    value.startDate === 0
+      ? ""
+      : moment
+          .utc(value.startDate * 1000)
+          .format("DD-MM-YYYY")
+          .toString() + " / ";
+  const tarixe =
+    value.endDate === 0
+      ? ""
+      : moment
+          .utc(value.endDate * 1000)
+          .format("DD-MM-YYYY")
+          .toString();
+  return (
+    <TableRow key={value.empEduInfoId}>
+      <TableCell component="th" scope="row">
+        {tarixs + tarixe}
+      </TableCell>
+      <TableCell align="right">{value.eduInstType}</TableCell>
+      <TableCell align="right">{value.eduInstName}</TableCell>
+      <TableCell align="right">{value.ixtisas}</TableCell>
+      <TableCell align="right">{value.score}</TableCell>
+    </TableRow>
+  );
+}
+
+function getCourseList(value) {
+  const tarixs =
+    value.beginDate === 0
+      ? ""
+      : moment
+          .utc(value.beginDate * 1000)
+          .format("DD-MM-YYYY")
+          .toString() + " / ";
+  const tarixe =
+    value.endDate === 0
+      ? ""
+      : moment
+          .utc(value.endDate * 1000)
+          .format("DD-MM-YYYY")
+          .toString();
+  return (
+    <TableRow key={value.courseId}>
+      <TableCell component="th" scope="row">
+        {value.title}
+      </TableCell>
+      <TableCell align="right">{tarixs + tarixe}</TableCell>
+    </TableRow>
+  );
+}
+
+function getCertificateList(value) {
+  const tarix =
+    value.date === 0
+      ? ""
+      : moment
+          .utc(value.date * 1000)
+          .format("DD-MM-YYYY")
+          .toString();
+  return (
+    <TableRow key={value.certificateId}>
+      <TableCell component="th" scope="row">
+        {value.orgTitle}
+      </TableCell>
+      <TableCell align="right">{value.title}</TableCell>
+      <TableCell align="right">{value.grade}</TableCell>
+      <TableCell align="right">{tarix}</TableCell>
+    </TableRow>
+  );
+}
+
+function getContactList(value) {
+  return (
+    <TableRow key={value.contactId}>
+      <TableCell component="th" scope="row">
+        {value.contactType}
+      </TableCell>
+      <TableCell align="right">{value.contactText}</TableCell>
+      <TableCell align="right">{value.note}</TableCell>
+    </TableRow>
+  );
+}
+
+function getLangList(value) {
+  return (
+    <TableRow key={value.langId}>
+      <TableCell component="th" scope="row">
+        {value.lang}
+      </TableCell>
+      <TableCell align="right">{value.langLevel}</TableCell>
+    </TableRow>
+  );
+}
+
+function getCompList(value) {
+  return (
+    <TableRow key={value.compId}>
+      <TableCell component="th" scope="row">
+        {value.comp}
+      </TableCell>
+      <TableCell align="right">{value.compLevel}</TableCell>
+    </TableRow>
+  );
+}
+
+function getChildrenList(value) {
+  const ageTitle =
+    value.yash.year > 0
+      ? value.yash.year + " yaş"
+      : value.yash.month > 0
+      ? value.yash.month + " aylıq"
+      : value.yash.day > 0
+      ? value.yash.day + " gün"
+      : "";
+  return (
+    <TableRow key={value.empChildId}>
+      <TableCell component="th" scope="row">
+        {value.gender}
+      </TableCell>
+      <TableCell align="right">
+        {value.birthDate === 0
+          ? ""
+          : moment
+              .utc(value.birthDate * 1000)
+              .format("DD-MM-YYYY")
+              .toString()}
+      </TableCell>
+      <TableCell align="right">{ageTitle}</TableCell>
+      <TableCell align="right">
+        {value.isSaglamMehdudiyyet ? "VAR" : "YOXDUR"}
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function getPosList(value) {
+  return (
+    <TableRow key={value.empPosId}>
+      <TableCell component="th" scope="row">
+        {value.depTitle}
+      </TableCell>
+      <TableCell align="right">{value.posTitle}</TableCell>
+      <TableCell align="right">
+        {value.startDate === 0
+          ? "..."
+          : moment
+              .utc(value.startDate * 1000)
+              .format("DD-MM-YYYY")
+              .toString()}
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function getWorkExperienceList(value) {
+  return (
+    <TableRow key={value.empWorkExpId}>
+      <TableCell component="th" scope="row">
+        {value.startDate === 0
+          ? ""
+          : moment
+              .utc(value.startDate * 1000)
+              .format("DD-MM-YYYY")
+              .toString()}
+      </TableCell>
+      <TableCell align="right">
+        {value.endDate === 0
+          ? ""
+          : moment
+              .utc(value.endDate * 1000)
+              .format("DD-MM-YYYY")
+              .toString()}
+      </TableCell>
+      <TableCell align="right">{value.ymd.year}</TableCell>
+      <TableCell align="right">{value.ymd.month}</TableCell>
+      <TableCell align="right">{value.ymd.day}</TableCell>
+    </TableRow>
+  );
+}
+
+
+
+export default EmpProfile;
