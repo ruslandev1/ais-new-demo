@@ -14,13 +14,14 @@ import { setCurrentUser } from "./actions/loginAction";
 import { loadMessages } from "devextreme/localization";
 import ShortcutLinks from './components/shorcut-links/ShorcutLinks';
 import ProfilePage from './pages/ProfilePage';
+import HomePage from './pages/HomePage';
 
 
 const router = createBrowserRouter([
 
   {
     path: "/",
-    element: <ProtectedRoute />
+    element: <ProtectedRoute component={<HomePage />}/>
   },
   {
     path: "/login",
@@ -32,7 +33,7 @@ const router = createBrowserRouter([
   },
   {
     path : "/profile",
-    element : <ProfilePage />
+    element : <ProtectedRoute component={<ProfilePage />}/>
   }
   ,
 ]);

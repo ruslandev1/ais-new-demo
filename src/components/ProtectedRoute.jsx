@@ -9,6 +9,7 @@ const ProtectedRoute = ({
   accessState,
   loginState,
   fetchAppUserAccessInfoIfNeeded,
+  component
 }) => {
   if (
     !accessState ||
@@ -30,7 +31,7 @@ if (!loginState.isAuthenticated) {
     console.log("LOGIN_STATE", loginState)
     return <Navigate to={"/login"} replace />;
   }
-  return <HomePage />
+  return component
 ; 
 };
 
