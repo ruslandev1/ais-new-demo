@@ -149,7 +149,7 @@ function EmpProfile(props) {
       .catch((reason) => {
         // Handle error
         // For example: setErrorState(reason.message);
-      }).finally(console.log('empData after fetch', new Date(empData?.employeeData?.birthDate * 1000))
+      }
       )
   };
 
@@ -259,7 +259,6 @@ function EmpProfile(props) {
       });
   };
 
-
   const loadEmpEdu = () => {
     avrFetch(
       BACKEND_URL + "/api/Education/GetEducationByEmpId?empId=" + empData.empId
@@ -281,7 +280,7 @@ function EmpProfile(props) {
 
           setEmpEdu((prevEmpEdu) => ({
             ...prevEmpEdu,
-            empInst: [...prevEmpEdu.empInst, ...updatedEmpInst],
+            empInst: [...updatedEmpInst],
           }));
         }
       })
@@ -307,6 +306,7 @@ function EmpProfile(props) {
             ...prevEmpEdu,
             empCourse: [...prevEmpEdu.empCourse, ...updatedEmpCourse],
           }));
+          console.log(empCourse)
         }
       })
       .catch((reason) => {
@@ -436,8 +436,6 @@ function EmpProfile(props) {
 
   const empCourse = empEdu.empCourse;
   const empCertificate = empEdu.empCertificate;
-  const empContactRef = empContact;
-  const empPosRef = empPos;
   const empInst = empEdu.empInst
   const {employeeData : emp_data} = empData;
   return (
@@ -465,7 +463,7 @@ function EmpProfile(props) {
                   : empCurrentPos.posTitle}
               </h2>
               <p style={{ color: "red" }}>
-                {empData.stateId === 2 ? "işdən azad olunub" : ""}
+                {emp_data?.stateId === 2 ? "işdən azad olunub" : ""}
               </p>
             </Grid>
             <Grid item xs={2}>
@@ -483,12 +481,12 @@ function EmpProfile(props) {
                 square="true"
                 style={{ justifyContent: "center" }}
               >
-                <h5>İstifadəçi adı: {empData?.employeeData?.username}</h5>
+                <h5>İstifadəçi adı: {emp_data?.username}</h5>
                 <h5>
                   Doğum tarixi:{" "}
                   {empData.birthDate === 0
                     ? ""
-                    : new Date(empData?.employeeData?.birthDate * 1000)
+                    : new Date(emp_data?.birthDate * 1000)
                       .toDateString()}
                 </h5>
                 <h5>
@@ -515,17 +513,11 @@ function EmpProfile(props) {
                   )}
                 </h5>
                 <h5>
-                  Mobil telefon:
-                  {/* {empContact.map((item) =>
-
-                
-                  item.contactType === "Mobil" ? item.contactText : ""
-              )} */}
-                  empContact.map((item))
+                  Mobil telefon:{" "} 
+                  {empContact.map((contact,idx) => {
+                      {contact.contactText} 
+                  })}
                 </h5>
-                {/* <p>
-                                    qısa məlumat.....
-                                </p> */}
               </CardMedia>
             </Grid>
             <Grid item xs={10}>
@@ -540,7 +532,7 @@ function EmpProfile(props) {
                         <label htmlFor="fname">Adı</label>
                         <input
                           disabled="disabled"
-                          value={empData.firstName}
+                          value={emp_data?.firstName}
                           style={inputStyle}
                         />
                       </Grid>
@@ -548,7 +540,7 @@ function EmpProfile(props) {
                         <label htmlFor="lname">Soyadı</label>
                         <input
                           disabled="disabled"
-                          value={empData.lastName}
+                          value={emp_data?.lastName}
                           style={inputStyle}
                         />
                       </Grid>
@@ -556,7 +548,7 @@ function EmpProfile(props) {
                         <label htmlFor="fname">Ata adı</label>
                         <input
                           disabled="disabled"
-                          value={empData.fatherName}
+                          value={emp_data?.fatherName}
                           style={inputStyle}
                         />
                       </Grid>
@@ -565,9 +557,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.username)
+                            isEmpty(emp_data?.username)
                               ? ""
-                              : empData.username
+                              : emp_data?.username
                           }
                           style={inputStyle}
                         />
@@ -577,9 +569,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.citizenship)
+                            isEmpty(emp_data?.citizenship)
                               ? ""
-                              : empData.citizenship
+                              : emp_data?.citizenship
                           }
                           style={inputStyle}
                         />
@@ -589,9 +581,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.regAddress)
+                            isEmpty(emp_data?.regAddress)
                               ? ""
-                              : empData.regAddress.addressTitle
+                              : emp_data?.regAddress.addressTitle
                           }
                           style={inputStyle}
                         />
@@ -601,10 +593,10 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            empData.birthDate === 0
+                            emp_data?.birthDate === 0
                               ? ""
                               : a
-                                .utc(empData.birthDate * 1000)
+                                .utc(emp_data?.birthDate * 1000)
                                 .format("DD-MM-YYYY")
                                 .toString()
                           }
@@ -618,8 +610,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            empData.identityDoc
-                              ? empData.identityDoc
+                            emp_data?.identityDoc
+                              ? emp_data?.identityDoc
                               : ""
                           }
                           style={inputStyle}
@@ -630,8 +622,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            empData.cardNo
-                              ? empData.cardNo
+                            emp_data?.cardNo
+                              ? emp_data?.cardNo
                               : ""
                           }
                           style={inputStyle}
@@ -642,8 +634,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            empData.fin
-                              ? empData.fin
+                            emp_data?.fin
+                              ? emp_data?.fin
                               : ""
                           }
                           style={inputStyle}
@@ -654,9 +646,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.c1Code)
+                            isEmpty(emp_data?.c1Code)
                               ? ""
-                              : empData.c1Code
+                              : emp_data?.c1Code
                           }
                           style={inputStyle}
                         />
@@ -666,8 +658,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            empData.authority
-                              ? empData.authority
+                            emp_data?.authority
+                              ? emp_data?.authority
                               : ""
                           }
                           style={inputStyle}
@@ -678,10 +670,10 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            empData.dateOfIssue === 0
+                            emp_data?.dateOfIssue === 0
                               ? ""
                               : a
-                                .utc(empData.dateOfIssue * 1000)
+                                .utc(emp_data?.dateOfIssue * 1000)
                                 .format("DD-MM-YYYY")
                                 .toString()
                           }
@@ -693,10 +685,10 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            empData.dateOfExpiry === 0
+                            emp_data?.dateOfExpiry === 0
                               ? ""
                               : a
-                                .utc(empData.dateOfExpiry * 1000)
+                                .utc(emp_data?.dateOfExpiry * 1000)
                                 .format("DD-MM-YYYY")
                                 .toString()
                           }
@@ -708,8 +700,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            empData.gender
-                              ? empData.gender
+                            emp_data?.gender
+                              ? emp_data?.gender
                               : ""
                           }
                           style={inputStyle}
@@ -720,9 +712,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.maritalStatus)
+                            isEmpty(emp_data?.maritalStatus)
                               ? ""
-                              : empData.maritalStatus
+                              : emp_data?.maritalStatus
                           }
                           style={inputStyle}
                         />
@@ -734,8 +726,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            empData.militaryObliged
-                              ? empData.militaryObliged
+                            emp_data?.militaryObliged
+                              ? emp_data?.militaryObliged
                               : ""
                           }
                           style={inputStyle}
@@ -746,9 +738,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.dsmfCardNo)
+                            isEmpty(emp_data?.dsmfCardNo)
                               ? ""
-                              : empData.dsmfCardNo
+                              : emp_data?.dsmfCardNo
                           }
                           style={inputStyle}
                         />
@@ -758,9 +750,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.placeOfBirth)
+                            isEmpty(emp_data?.placeOfBirth)
                               ? ""
-                              : empData.placeOfBirth.addressTitle
+                              : emp_data?.placeOfBirth.addressTitle
                           }
                           style={inputStyle}
                         />
@@ -772,9 +764,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.curAddress)
+                            isEmpty(emp_data?.curAddress)
                               ? ""
-                              : empData.curAddress.addressTitle
+                              : emp_data?.curAddress.addressTitle
                           }
                           style={inputStyle}
                         />
@@ -784,9 +776,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.kvotaStatus)
+                            isEmpty(emp_data?.kvotaStatus)
                               ? []
-                              : empData.kvotaStatus.map(
+                              : emp_data?.kvotaStatus.map(
                                 (item) => item.familyStatusTitle
                               )
                           }
@@ -800,9 +792,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(empData.xusMezStatus)
+                            isEmpty(emp_data?.xusMezStatus)
                               ? ""
-                              : empData.xusMezStatus
+                              : emp_data?.xusMezStatus
                           }
                           style={inputStyle}
                         />
@@ -923,7 +915,7 @@ function EmpProfile(props) {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {empCourse.map((row) => getCourseList(row))}
+                            {empCourse?.map((row) => getCourseList(row))}
                           </TableBody>
                         </Table>
                       </Grid>
@@ -1033,7 +1025,7 @@ function EmpProfile(props) {
         </DialogTitle>
         <DialogContent>
           <ImageUpload
-            empId={empData.empId}
+            empId={emp_data?.empId}
             whenUploaded={() => {
               console.log("img uploaded");
               loadProfileImg();
