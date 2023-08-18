@@ -15,6 +15,7 @@ import { loadMessages } from "devextreme/localization";
 import ShortcutLinks from './components/shorcut-links/ShorcutLinks';
 import ProfilePage from './pages/ProfilePage';
 import HomePage from './pages/HomePage';
+import SettingsPage from './pages/SettingsPage';
 
 
 const router = createBrowserRouter([
@@ -34,8 +35,11 @@ const router = createBrowserRouter([
   {
     path : "/profile",
     element : <ProtectedRoute component={<ProfilePage />}/>
-  }
-  ,
+  },
+  {
+    path : "/settings",
+    element : <ProtectedRoute component={<SettingsPage />}/>
+  },
 ]);
 
 

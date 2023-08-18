@@ -9,7 +9,7 @@ import {
 import { BACKEND_URL } from "../../utils/Constants";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import { Avatar as CardAvatar, Container } from "@mui/material";
+import { Avatar as MuiAvatar, Container } from "@mui/material";
 import { CardMedia } from "@mui/material";
 import { Address } from "../AdressSelector";
 import { isEmpty } from "../../utils";
@@ -62,7 +62,11 @@ const inputStyle = {
   boxSizing: "border-box",
   background: "white",
 };
-
+const Avatar = styled(MuiAvatar)(({ theme }) => ({
+  '& .profile-image': {
+      maxWidth: "100%",  
+    },
+}));
 // add plugin to dayjs
 
 dayjs.extend(utc)
@@ -440,8 +444,8 @@ function EmpProfile(props) {
   const {employeeData : emp_data} = empData;
   return (
     <>
-      <Card style={{ marginTop: 0 }}>
-        <Grid style={{ flexGrow: 1, padding: 0 }}>
+      <Card style={{ marginTop: 50 }}>
+        <Grid style={{ flexGrow: 1, padding: 30 }}>
           <Grid
             item
             xs={12}
@@ -466,16 +470,17 @@ function EmpProfile(props) {
                 {emp_data?.stateId === 2 ? "işdən azad olunub" : ""}
               </p>
             </Grid>
-            <Grid item xs={2}>
-              <CardAvatar profile square="true">
-                <a href="#pablo" onClick={(e) => handleClickOpen(e)}>
+            <Grid item xs={2} display={"flex"} flexDirection={"column"} alignItems={"center"}>
+              <Avatar profile square="true" sx={{width: 130, height: 130, bottom: 50, textAlign: "center"}}>
+                <a href="#" onClick={(e) => handleClickOpen(e)}>
                   <img
                     ref={imgRef}
+                    className="profile-image"
                     src="http://www.markweb.in/primehouseware/images/noimage.png"
                     alt="..."
                   />
                 </a>
-              </CardAvatar>
+              </Avatar>
               <CardMedia
                 profile
                 square="true"
@@ -513,9 +518,9 @@ function EmpProfile(props) {
                   )}
                 </h5>
                 <h5>
-                  Mobil telefon:{" "} 
-                  {empContact.map((contact,idx) => {
-                      {contact.contactText} 
+                  Mobil telefon: 
+                  {empContact?.map((contact,idx) => {
+                      return <p>{contact.contactText}</p> 
                   })}
                 </h5>
               </CardMedia>

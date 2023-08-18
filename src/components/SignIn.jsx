@@ -17,13 +17,13 @@ import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 const MainLayout = styled('main')(({ theme }) => ({
   width: 'auto',
-
   // Fix IE 11 issue.
-  display: 'block',
-
+  display: 'flex',
+  alignItems: "center",
+  justifyContent: "center",
   marginLeft: theme.spacing(3),
   marginRight: theme.spacing(3),
-
+  
   // [theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
   [theme.breakpoints.up(400 + theme.spacing(6))]: {
     width: 400,
@@ -35,7 +35,8 @@ const MainLayout = styled('main')(({ theme }) => ({
 const StyledPaper = styled(Paper)(({ theme }) => ({
   // marginTop: theme.spacing.unit * 16,
   marginTop: theme.spacing(16),
-
+  
+  maxWidth: "1200px",
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

@@ -103,7 +103,7 @@ class Home extends React.Component {
               alt="profile picture"
               src="http://www.markweb.in/primehouseware/images/noimage.png"
               className="profile-image"
-            />
+          />
           </Avatar>
         </CardMedia>
         <CardContent>
