@@ -10,7 +10,7 @@ import { BACKEND_URL } from "../../utils/Constants";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import { Avatar as MuiAvatar, Container, Typography } from "@mui/material";
-import { CardMedia } from "@mui/material";
+import { CardMedia as MuiCardMedia } from "@mui/material";
 import { Address } from "../AdressSelector";
 import { isEmpty } from "../../utils";
 import Table from "@mui/material/Table";
@@ -68,6 +68,12 @@ const Avatar = styled(MuiAvatar)(({ theme }) => ({
   },
 }));
 // add plugin to dayjs
+
+const CardMedia = styled(MuiCardMedia)(({ theme}) => ({
+  '& .card-text': {
+    paddingBottom : "20px"
+  },
+}))
 
 dayjs.extend(utc)
 
@@ -444,7 +450,7 @@ function EmpProfile(props) {
   return (
     <>
       <Card style={{ marginTop: 50 }}>
-        <Grid style={{ flexGrow: 1, padding: 30 }}>
+        <Grid style={{ flexGrow: 1, padding: 30 }} item>
           <Grid
             item
             xs={12}
@@ -454,9 +460,9 @@ function EmpProfile(props) {
             direction={"row"}
             justifyContent={"flex-start"}
           >
-            <Grid item xs={2} />
-            <Grid item xs={10}>
-              <Typography sx={{ typography: { sm: 'body1', xs: 'body2' } }}>
+            <Grid item xs={6}  lg={2} />
+            <Grid item xs={6} lg={10}>
+              <Typography variant="h4">
                 {emp_data?.firstName} {emp_data?.lastName}{" "}
               </Typography>{" "}
               {/*style={{color: '#0052cc'}}*/}
@@ -469,7 +475,7 @@ function EmpProfile(props) {
                 {emp_data?.stateId === 2 ? "işdən azad olunub" : ""}
               </p>
             </Grid>
-            <Grid item xs={2} display={"flex"} flexDirection={"column"} alignItems={"center"}>
+            <Grid item xs={12} lg={2} >
               <Avatar profile square="true" sx={{ width: 130, height: 130, bottom: 50, textAlign: "center" }}>
                 <a href="#" onClick={(e) => handleClickOpen(e)}>
                   <img
@@ -483,50 +489,50 @@ function EmpProfile(props) {
               <CardMedia
                 profile
                 square="true"
-                style={{ justifyContent: "center" }}
+                // sx={{padding : 2}}
               >
-                <h5>İstifadəçi adı: {emp_data?.username}</h5>
-                <h5>
+                <Typography className="card-text">İstifadəçi adı: {emp_data?.username}</Typography>
+                <Typography className="card-text">
                   Doğum tarixi:{" "}
                   {emp_data?.birthDate === 0
                     ? ""
                     : new Date(emp_data?.birthDate * 1000)
                       .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
-                </h5>
-                <h5>
+                </Typography>
+                <Typography className="card-text">
                   Struktur qurum:{" "}
                   {isEmpty(empCurrentPos)
                     ? ""
                     : empCurrentPos.depTitle}
-                </h5>
-                <h5>
+                </Typography>
+                <Typography className="card-text">
                   İşə başladığı tarix:{" "}
                   {empCurrentPos.startDate === 0
                     ? ""
                     : new Date(empCurrentPos.startDate * 1000)
                       .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
-                </h5>
-                <h5>
+                </Typography>
+                <Typography className="card-text">
                   Elektron poçt:{" "}
                   {empContact.map((item) =>
                     item.contactType === "Elektron poçt"
                       ? item.contactText
                       : ""
                   )}
-                </h5>
-                <h5>
+                </Typography>
+                <Typography className="card-text">
                   Mobil telefon:
                   {empContact?.map((contact, idx) => {
                     return <p>{contact.contactText}</p>
                   })}
-                </h5>
+                </Typography>
               </CardMedia>
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs={12} lg={10}  >
               <CardMedia profile square="true">
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3" }}> Şəxsi məlumatlar </h3>
+                    <Typography style={{ color: "#0047b3" }}> Şəxsi məlumatlar </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
@@ -823,10 +829,10 @@ function EmpProfile(props) {
                 </Accordion>
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                    <Typography style={{ color: "#0047b3", marginTop: 30 }}>
                       {" "}
                       İş məlumatları{" "}
-                    </h3>
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
@@ -870,10 +876,10 @@ function EmpProfile(props) {
                 </Accordion>
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                    <Typography style={{ color: "#0047b3", marginTop: 30 }}>
                       {" "}
                       Təhsil{" "}
-                    </h3>
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
@@ -941,10 +947,10 @@ function EmpProfile(props) {
                 </Accordion>
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                    <Typography style={{ color: "#0047b3", marginTop: 30 }}>
                       {" "}
                       Əlaqə{" "}
-                    </h3>
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
@@ -967,10 +973,10 @@ function EmpProfile(props) {
                 </Accordion>
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                    <Typography style={{ color: "#0047b3", marginTop: 30 }}>
                       {" "}
                       Əlavə Biliklər{" "}
-                    </h3>
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
