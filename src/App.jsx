@@ -15,7 +15,25 @@ import { loadMessages } from "devextreme/localization";
 import ShortcutLinks from './components/shorcut-links/ShorcutLinks';
 import ProfilePage from './pages/ProfilePage';
 import HomePage from './pages/HomePage';
+import SettingsPage from './pages/SettingsPage';
+import {
+  createTheme,
+  responsiveFontSizes,
+  ThemeProvider,
+} from '@mui/material/styles';
 
+let theme = createTheme();
+theme = responsiveFontSizes(theme);
+
+theme.typography.h3 = {
+  fontSize: '1.2rem',
+  '@media (min-width:600px)': {
+    fontSize: '1.5rem',
+  },
+  [theme.breakpoints.up('md')]: {
+    fontSize: '2.4rem',
+  },
+};
 
 const router = createBrowserRouter([
 
@@ -34,8 +52,11 @@ const router = createBrowserRouter([
   {
     path : "/profile",
     element : <ProtectedRoute component={<ProfilePage />}/>
-  }
-  ,
+  },
+  {
+    path : "/settings",
+    element : <ProtectedRoute component={<SettingsPage />}/>
+  },
 ]);
 
 
@@ -49,7 +70,9 @@ function App({loadAuthToken}) {
 
   return (
     <div className='main-wrapper'>
+      <ThemeProvider theme={theme}>
       <RouterProvider router={router} />
+      </ThemeProvider>
     </div>
   )
 }

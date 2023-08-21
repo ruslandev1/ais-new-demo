@@ -1,12 +1,12 @@
-import MuiDialogTitle from '@mui/material/DialogTitle';
+import React from "react";
 import { styled } from '@mui/material/styles';
+import MuiDialogTitle from '@mui/material/DialogTitle';
 import MuiDialogContent from '@mui/material/DialogContent';
 import MuiDialogActions from '@mui/material/DialogActions';
-import React from "react";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography/Typography";
-import withStyles from "@mui/material/styles/withStyles";
 import CloseIcon from '@mui/icons-material/Close';
+
 
 const PREFIX = 'DialogTitle';
 

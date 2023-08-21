@@ -9,8 +9,8 @@ import {
 import { BACKEND_URL } from "../../utils/Constants";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import { Avatar as CardAvatar, Container } from "@mui/material";
-import { CardMedia } from "@mui/material";
+import { Avatar as MuiAvatar, Container, Typography } from "@mui/material";
+import { CardMedia as MuiCardMedia } from "@mui/material";
 import { Address } from "../AdressSelector";
 import { isEmpty } from "../../utils";
 import Table from "@mui/material/Table";
@@ -62,8 +62,18 @@ const inputStyle = {
   boxSizing: "border-box",
   background: "white",
 };
-
+const Avatar = styled(MuiAvatar)(({ theme }) => ({
+  '& .profile-image': {
+    maxWidth: "100%",
+  },
+}));
 // add plugin to dayjs
+
+const CardMedia = styled(MuiCardMedia)(({ theme}) => ({
+  '& .card-text': {
+    paddingBottom : "20px"
+  },
+}))
 
 dayjs.extend(utc)
 
@@ -104,7 +114,7 @@ function EmpProfile(props) {
 
 
 
-  const [open,setOpen] = useState(true)
+  const [open, setOpen] = useState(true)
   // handle \
   const handleClose = () => {
     setOpen(false);
@@ -128,7 +138,6 @@ function EmpProfile(props) {
       );
   };
   const loadEmpData = () => {
-    const today = new Date()
     avrFetch(BACKEND_URL + "/api/Employee/GetProfileData/" + empData.empId)
       .then(validateResponse)
       .then(readResponseAsJSON)
@@ -418,7 +427,7 @@ function EmpProfile(props) {
         // For example: setErrorState(err.message);
       });
   };
-  
+
   useEffect(() => {
     loadEmpData();
     loadProfileImg();
@@ -437,11 +446,11 @@ function EmpProfile(props) {
   const empCourse = empEdu.empCourse;
   const empCertificate = empEdu.empCertificate;
   const empInst = empEdu.empInst
-  const {employeeData : emp_data} = empData;
+  const { employeeData: emp_data } = empData;
   return (
     <>
-      <Card style={{ marginTop: 0 }}>
-        <Grid style={{ flexGrow: 1, padding: 0 }}>
+      <Card style={{ marginTop: 50 }}>
+        <Grid style={{ flexGrow: 1, padding: 30 }} item>
           <Grid
             item
             xs={12}
@@ -451,11 +460,11 @@ function EmpProfile(props) {
             direction={"row"}
             justifyContent={"flex-start"}
           >
-            <Grid item xs={2} />
-            <Grid item xs={10}>
-              <h1 style={{ color: "" }}>
+            <Grid item xs={6}  lg={2} />
+            <Grid item xs={6} lg={10}>
+              <Typography variant="h4">
                 {emp_data?.firstName} {emp_data?.lastName}{" "}
-              </h1>{" "}
+              </Typography>{" "}
               {/*style={{color: '#0052cc'}}*/}
               <h2 style={{ color: "" }}>
                 {isEmpty(empCurrentPos)
@@ -466,65 +475,64 @@ function EmpProfile(props) {
                 {emp_data?.stateId === 2 ? "işdən azad olunub" : ""}
               </p>
             </Grid>
-            <Grid item xs={2}>
-              <CardAvatar profile square="true">
-                <a href="#pablo" onClick={(e) => handleClickOpen(e)}>
+            <Grid item xs={12} lg={2} >
+              <Avatar profile square="true" sx={{ width: 130, height: 130, bottom: 50, textAlign: "center" }}>
+                <a href="#" onClick={(e) => handleClickOpen(e)}>
                   <img
                     ref={imgRef}
+                    className="profile-image"
                     src="http://www.markweb.in/primehouseware/images/noimage.png"
                     alt="..."
                   />
                 </a>
-              </CardAvatar>
+              </Avatar>
               <CardMedia
                 profile
                 square="true"
-                style={{ justifyContent: "center" }}
+                // sx={{padding : 2}}
               >
-                <h5>İstifadəçi adı: {emp_data?.username}</h5>
-                <h5>
+                <Typography className="card-text">İstifadəçi adı: {emp_data?.username}</Typography>
+                <Typography className="card-text">
                   Doğum tarixi:{" "}
-                  {empData.birthDate === 0
+                  {emp_data?.birthDate === 0
                     ? ""
                     : new Date(emp_data?.birthDate * 1000)
-                      .toDateString()}
-                </h5>
-                <h5>
+                      .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
+                </Typography>
+                <Typography className="card-text">
                   Struktur qurum:{" "}
                   {isEmpty(empCurrentPos)
                     ? ""
                     : empCurrentPos.depTitle}
-                </h5>
-                <h5>
+                </Typography>
+                <Typography className="card-text">
                   İşə başladığı tarix:{" "}
                   {empCurrentPos.startDate === 0
                     ? ""
-                    : a
-                      .utc(empCurrentPos.startDate * 1000)
-                      .format("DD-MM-YYYY")
-                      .toString()}
-                </h5>
-                <h5>
+                    : new Date(empCurrentPos.startDate * 1000)
+                      .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
+                </Typography>
+                <Typography className="card-text">
                   Elektron poçt:{" "}
                   {empContact.map((item) =>
                     item.contactType === "Elektron poçt"
                       ? item.contactText
                       : ""
                   )}
-                </h5>
-                <h5>
-                  Mobil telefon:{" "} 
-                  {empContact.map((contact,idx) => {
-                      {contact.contactText} 
+                </Typography>
+                <Typography className="card-text">
+                  Mobil telefon:
+                  {empContact?.map((contact, idx) => {
+                    return <p>{contact.contactText}</p>
                   })}
-                </h5>
+                </Typography>
               </CardMedia>
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs={12} lg={10}  >
               <CardMedia profile square="true">
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3" }}> Şəxsi məlumatlar </h3>
+                    <Typography style={{ color: "#0047b3" }}> Şəxsi məlumatlar </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
@@ -592,14 +600,11 @@ function EmpProfile(props) {
                         <label htmlFor="birthDate">Doğum tarixi</label>
                         <input
                           disabled="disabled"
-                          value={
-                            emp_data?.birthDate === 0
-                              ? ""
-                              : a
-                                .utc(emp_data?.birthDate * 1000)
-                                .format("DD-MM-YYYY")
-                                .toString()
-                          }
+                          value=
+                          {emp_data?.birthDate === 0
+                            ? ""
+                            : new Date(emp_data?.birthDate * 1000)
+                              .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
                           style={inputStyle}
                         />
                       </Grid>
@@ -672,10 +677,8 @@ function EmpProfile(props) {
                           value={
                             emp_data?.dateOfIssue === 0
                               ? ""
-                              : a
-                                .utc(emp_data?.dateOfIssue * 1000)
-                                .format("DD-MM-YYYY")
-                                .toString()
+                              : new Date(emp_data?.dateOfIssue * 1000)
+                                .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })
                           }
                           style={inputStyle}
                         />
@@ -687,10 +690,8 @@ function EmpProfile(props) {
                           value={
                             emp_data?.dateOfExpiry === 0
                               ? ""
-                              : a
-                                .utc(emp_data?.dateOfExpiry * 1000)
-                                .format("DD-MM-YYYY")
-                                .toString()
+                              : new Date(emp_data?.dateOfExpiry * 1000)
+                                .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })
                           }
                           style={inputStyle}
                         />
@@ -828,10 +829,10 @@ function EmpProfile(props) {
                 </Accordion>
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                    <Typography style={{ color: "#0047b3", marginTop: 30 }}>
                       {" "}
                       İş məlumatları{" "}
-                    </h3>
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
@@ -875,10 +876,10 @@ function EmpProfile(props) {
                 </Accordion>
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                    <Typography style={{ color: "#0047b3", marginTop: 30 }}>
                       {" "}
                       Təhsil{" "}
-                    </h3>
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
@@ -946,10 +947,10 @@ function EmpProfile(props) {
                 </Accordion>
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                    <Typography style={{ color: "#0047b3", marginTop: 30 }}>
                       {" "}
                       Əlaqə{" "}
-                    </h3>
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
@@ -972,10 +973,10 @@ function EmpProfile(props) {
                 </Accordion>
                 <Accordion defaultExpanded={true}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <h3 style={{ color: "#0047b3", marginTop: 30 }}>
+                    <Typography style={{ color: "#0047b3", marginTop: 30 }}>
                       {" "}
                       Əlavə Biliklər{" "}
-                    </h3>
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
@@ -1048,17 +1049,13 @@ function getEduList(value) {
   const tarixs =
     value.startDate === 0
       ? ""
-      : moment
-          .utc(value.startDate * 1000)
-          .format("DD-MM-YYYY")
-          .toString() + " / ";
+      : new Date(value.startDate * 1000)
+        .toDateString() + " / ";
   const tarixe =
     value.endDate === 0
       ? ""
-      : moment
-          .utc(value.endDate * 1000)
-          .format("DD-MM-YYYY")
-          .toString();
+      : new Date(value.endDate * 1000)
+        .toDateString();
   return (
     <TableRow key={value.empEduInfoId}>
       <TableCell component="th" scope="row">
@@ -1076,17 +1073,15 @@ function getCourseList(value) {
   const tarixs =
     value.beginDate === 0
       ? ""
-      : moment
-          .utc(value.beginDate * 1000)
-          .format("DD-MM-YYYY")
-          .toString() + " / ";
+      : new Date(value.beginDate * 1000)
+        .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })
+    ;
   const tarixe =
     value.endDate === 0
       ? ""
-      : moment
-          .utc(value.endDate * 1000)
-          .format("DD-MM-YYYY")
-          .toString();
+      : new Date(value.endDate * 1000)
+        .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })
+    ;
   return (
     <TableRow key={value.courseId}>
       <TableCell component="th" scope="row">
@@ -1101,10 +1096,8 @@ function getCertificateList(value) {
   const tarix =
     value.date === 0
       ? ""
-      : moment
-          .utc(value.date * 1000)
-          .format("DD-MM-YYYY")
-          .toString();
+      : new Date(value.date * 1000)
+        .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" });
   return (
     <TableRow key={value.certificateId}>
       <TableCell component="th" scope="row">
@@ -1156,10 +1149,10 @@ function getChildrenList(value) {
     value.yash.year > 0
       ? value.yash.year + " yaş"
       : value.yash.month > 0
-      ? value.yash.month + " aylıq"
-      : value.yash.day > 0
-      ? value.yash.day + " gün"
-      : "";
+        ? value.yash.month + " aylıq"
+        : value.yash.day > 0
+          ? value.yash.day + " gün"
+          : "";
   return (
     <TableRow key={value.empChildId}>
       <TableCell component="th" scope="row">
@@ -1168,10 +1161,8 @@ function getChildrenList(value) {
       <TableCell align="right">
         {value.birthDate === 0
           ? ""
-          : moment
-              .utc(value.birthDate * 1000)
-              .format("DD-MM-YYYY")
-              .toString()}
+          : new Date(value.birthDate * 1000)
+            .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
       </TableCell>
       <TableCell align="right">{ageTitle}</TableCell>
       <TableCell align="right">
@@ -1191,10 +1182,8 @@ function getPosList(value) {
       <TableCell align="right">
         {value.startDate === 0
           ? "..."
-          : moment
-              .utc(value.startDate * 1000)
-              .format("DD-MM-YYYY")
-              .toString()}
+          : new Date(value.startDate * 1000).
+            toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
       </TableCell>
     </TableRow>
   );
@@ -1206,18 +1195,14 @@ function getWorkExperienceList(value) {
       <TableCell component="th" scope="row">
         {value.startDate === 0
           ? ""
-          : moment
-              .utc(value.startDate * 1000)
-              .format("DD-MM-YYYY")
-              .toString()}
+          : new Date(value.startDate * 1000).
+            toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
       </TableCell>
       <TableCell align="right">
         {value.endDate === 0
           ? ""
-          : moment
-              .utc(value.endDate * 1000)
-              .format("DD-MM-YYYY")
-              .toString()}
+          : new Date(value.endDate * 1000).
+            toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
       </TableCell>
       <TableCell align="right">{value.ymd.year}</TableCell>
       <TableCell align="right">{value.ymd.month}</TableCell>

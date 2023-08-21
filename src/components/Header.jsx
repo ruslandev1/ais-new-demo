@@ -161,6 +161,9 @@ const Accordion = styled((props) => (
     setAnchorEl({ anchorEl: null });
     logOut(user);
   };
+  const handleResetSession = () => {
+    setAnchorEl({anchorEl : null})
+  }
   return (
     <CssBaseline>
       <AppBar position="fixed" open={open}>
@@ -205,7 +208,9 @@ const Accordion = styled((props) => (
                 <MenuItem onClick={handleProfile}>
                   <RouterLink to="/profile">Profil</RouterLink>
                 </MenuItem>
-                <MenuItem onClick={handleClose}>Tənzimləmə</MenuItem>
+                <MenuItem onClick={handleResetSession}>
+                <RouterLink to="/settings">Tənzimləmə</RouterLink>
+                </MenuItem>
                 <MenuItem onClick={handleLogout}>Çıxış</MenuItem>
               </Menu>
         </Toolbar>

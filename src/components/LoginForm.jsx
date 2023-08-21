@@ -30,11 +30,11 @@ const StyledSignIn = styled(SignIn)((
     [`& .${classes.bullet}`]: {
         display: 'inline-block',
         margin: '0 2px',
-        transform: 'scale(0.8)',
+        transform: 'scale(0.6)',
     },
 
     [`& .${classes.title}`]: {
-        marginBottom: 16,
+        marginBottom: 56,
         fontSize: 14,
     },
 
