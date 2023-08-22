@@ -234,7 +234,7 @@ const Accordion = styled((props) => (
         </DrawerHeader>
         <Divider />
         <List>
-          {['Əsas Səhifə', 'Qısayol keçidlər', 'Hesabat'].map((text, index) => (
+          {[props.moduleTitle].map((text, index) => (
             <RouterLink to="/" key={index + "_rscl"}>
             <Link  key={index + "_scl"} disablePadding  underline='none' sx={{color: "black"}}>
               <ListItemButton>
