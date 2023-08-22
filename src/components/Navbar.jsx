@@ -1,4 +1,4 @@
-import { Navbar, Group, Text, ScrollArea, createStyles, rem } from '@mantine/core';
+import { Navbar, Group, Text, ScrollArea, createStyles, rem ,NavLink} from '@mantine/core';
 import {
   Notes,
   CalendarStats,
@@ -7,9 +7,10 @@ import {
   FileAnalytics,
   Adjustments,
   Lock,
-} from "tabler-icons-react"
+} from "tabler-icons-react" 
 import { UserButton } from './UserButton';
 import { LinksGroup } from './NavbarLinksGroup';
+import { Link } from 'react-router-dom';
 
 
 const useStyles = createStyles((theme) => ({
@@ -47,20 +48,20 @@ const useStyles = createStyles((theme) => ({
     }`,
   },
 }));
-
 export function NavbarNested(props) {
   const mockdata = [
-    { label: props.moduleTitle, icon: Gauge , link: "/profile"},
+    { label: props.moduleTitle, icon: Gauge , link: "/"},
     {
       label: props.moduleTitle,
       icon: Notes,
       initiallyOpened: true,
+      link: "/"
     },
     {
       label: props.moduleTitle,
       icon: CalendarStats,
     },
-    { label: 'Analytics', icon: PresentationAnalytics },
+    { label: 'Analytics', icon: PresentationAnalytics , link: "/"},
     { label: 'Contracts', icon: FileAnalytics },
     { label: 'Settings', icon: Adjustments },
     {
@@ -76,17 +77,18 @@ export function NavbarNested(props) {
   
   const { classes } = useStyles();
   const links = mockdata.map((item) => <LinksGroup {...item} key={item.label} />);
-
+  console.log("All", links.map((link) => console.log(link)))
   return (
     <Navbar height={800} width={{ sm: 300 }} p="md" className={classes.navbar} >
-      <Navbar.Section className={classes.header}>
+      <Navbar.Section className={classes.header} >
         <Group position="apart">
           <Text fz="lg">AVRORA</Text>
         </Group>
       </Navbar.Section>
 
       <Navbar.Section grow className={classes.links} component={ScrollArea}>
-        <div className={classes.linksInner}>{links}</div>
+        {/* links.map(link) */}
+        <div className={classes.linksInner}><Link to={links.link}>{links}</Link></div>
       </Navbar.Section>
 
       <Navbar.Section className={classes.footer}>

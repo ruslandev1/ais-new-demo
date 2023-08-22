@@ -54,21 +54,23 @@ const useStyles = createStyles((theme) => ({
 
 }));
 
-export function LinksGroup({ icon: Icon, label, initiallyOpened, links }) {
+export function LinksGroup({ icon: Icon, label, initiallyOpened, links,moduleTitle }) {
   const { classes, theme } = useStyles();
   const hasLinks = Array.isArray(links);
+  console.log(links)
   const [opened, setOpened] = useState(initiallyOpened || false);
   const ChevronIcon = theme.dir === 'ltr' ? ChevronRight : ChevronLeft;
+
+  
   const items = (hasLinks ? links : []).map((link) => (
     <Link to={link.link}>
     <NavLink
     label={link.label}
     className={classes.link}
-    onClick={(event) => event.preventDefault()}
     key={link.label}
     sx={{maxWidth : "90%"}}
     />
-      </Link>
+    </Link>
   ));
 
   return (
