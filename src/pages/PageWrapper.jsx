@@ -37,7 +37,6 @@ const PageWrapper = ({component}) => {
     console.log("component", component)
     return (
         <div id={"idPageWrapper"}>
-            <CssBaseline>
                     <Appframe>
                         <Header />
                         <Mainlayout>
@@ -45,7 +44,6 @@ const PageWrapper = ({component}) => {
                         </Mainlayout>
                     </Appframe>
                     <Footer />
-            </CssBaseline>
         </div>
     );
 }

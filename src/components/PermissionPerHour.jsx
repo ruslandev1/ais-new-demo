@@ -8,6 +8,7 @@ import { BACKEND_URL } from "../utils/Constants";
 import ApiHelper from "../utils/ApiHelper";
 import ToastHelper from "../utils/ToastHelper";
 import { useState, useEffect } from "react";
+import { Text } from "@mantine/core";
 
 const GET_SAATLIQ_ICAZE =
   BACKEND_URL + "/api/EmpIcazeSaat/GetIcazeSaatByEmpId/";
@@ -113,6 +114,7 @@ export default function EmpSaatliqIcaze(props) {
         >
           Saatlıq İcazə Məlumatı
         </Typography>
+        <Text>Salam</Text>
         <Typography component={"div"}>
           <Typography variant="p" component="div" className={classes.title}>
             İstifadə edilə bilər :

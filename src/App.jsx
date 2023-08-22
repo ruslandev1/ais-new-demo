@@ -21,19 +21,10 @@ import {
   responsiveFontSizes,
   ThemeProvider,
 } from '@mui/material/styles';
+import { MantineProvider} from '@mantine/core';
 
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
-
-theme.typography.h3 = {
-  fontSize: '1.2rem',
-  '@media (min-width:600px)': {
-    fontSize: '1.5rem',
-  },
-  [theme.breakpoints.up('md')]: {
-    fontSize: '2.4rem',
-  },
-};
 
 const router = createBrowserRouter([
 
@@ -70,9 +61,11 @@ function App({loadAuthToken}) {
 
   return (
     <div className='main-wrapper'>
+    <MantineProvider withGlobalStyles withNormalizeCSS> 
       <ThemeProvider theme={theme}>
       <RouterProvider router={router} />
       </ThemeProvider>
+      </MantineProvider>
     </div>
   )
 }

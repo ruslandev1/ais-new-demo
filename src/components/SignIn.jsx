@@ -1,68 +1,26 @@
-import React, { Fragment } from "react";
-import { styled } from '@mui/material/styles';
+import React from "react";
 import PropTypes from "prop-types";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import FormControl from "@mui/material/FormControl";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Input from "@mui/material/Input";
-import InputLabel from "@mui/material/InputLabel";
-import Paper from "@mui/material/Paper";
-import logo from "../assets/img/logo.png";
-import FormHelperText from "@mui/material/FormHelperText";
-
+import { TextInput, Checkbox, Button, Group, Paper, PasswordInput, Center, createStyles, Flex, Text, Transition } from '@mantine/core';
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import AlertForError from "./Alert";
+import { isEmpty } from "../utils";
+import { useTimeout } from '@mantine/hooks';
 
-
-const MainLayout = styled('main')(({ theme }) => ({
-  width: 'auto',
-  // Fix IE 11 issue.
-  display: 'flex',
-  alignItems: "center",
-  justifyContent: "center",
-  marginLeft: theme.spacing(3),
-  marginRight: theme.spacing(3),
-  
-  // [theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
-  [theme.breakpoints.up(400 + theme.spacing(6))]: {
-    width: 400,
-    marginLeft: 'auto',
-    marginRight: 'auto',
+const useStyles = createStyles((theme) => ({
+  invalid: {
+    backgroundColor:
+      theme.colorScheme === 'dark' ? theme.fn.rgba(theme.colors.red[8], 0.15) : theme.colors.red[0],
   },
+
+  icon: {
+    color: theme.colors.red[theme.colorScheme === 'dark' ? 7 : 6],
+  },
+ 
 }));
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  // marginTop: theme.spacing.unit * 16,
-  marginTop: theme.spacing(16),
-  
-  maxWidth: "1200px",
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-
-  // padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 3}px ${theme.spacing.unit * 3}px`,
-  padding: `${theme.spacing(2)} ${theme.spacing(3)} ${theme.spacing(3)}`,
-}));
-
-const StyledForm = styled('form')(({ theme }) => ({
-  // Fix IE 11 issue.
-  width: '100%',
-
-  marginTop: theme.spacing(1),
-}));
-const ButtonSubmit = styled(Button)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-}));
-
-// TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
-
-
-let recaptchaInstance = null;
 
 function SignIn(props) {
   const {
-    classes,
     onSubmit,
     onChange,
     username,
@@ -72,81 +30,139 @@ function SignIn(props) {
   } = props;
 
 
+
+  // return (
+  //   <Fragment>
+  //     <CssBaseline />
+  //     <MainLayout>
+  //       <StyledPaper>
+  //         <img src={logo} />
+  //         {errors.summary && (
+  //           <FormHelperText error={true} id="component-helper-text">
+  //             {errors.summary}
+  //           </FormHelperText>
+  //         )}
+  //         {logInProgress && <CircularProgress size={15} color="secondary" />}
+  //         <StyledForm>
+  //           <FormControl margin="normal" required fullWidth>
+  //             <InputLabel htmlFor="username">İstifadəçi adı</InputLabel>
+  //             <Input
+  //               id="username"
+  //               name="username"
+  //               autoComplete="email"
+  //               autoFocus
+  //               onChange={(event) =>
+  //                 onChange({
+  //                   name: event.target.name,
+  //                   value: event.target.value,
+  //                 })
+  //               }
+  //               value={username}
+  //             />
+  //             {errors.username && (
+  //               <FormHelperText error={true} id="component-helper-text">
+  //                 {errors.username}
+  //               </FormHelperText>
+  //             )}
+  //           </FormControl>
+  //           <FormControl margin="normal" required fullWidth>
+  //             <InputLabel htmlFor="password">Parol</InputLabel>
+  //             <Input
+  //               name="password"
+  //               type="password"
+  //               id="password"
+  //               value={password}
+  //               onChange={(event) =>
+  //                 onChange({
+  //                   name: event.target.name,
+  //                   value: event.target.value,
+  //                 })
+  //               }
+  //               autoComplete="current-password"
+  //             />
+  //             {errors.password && (
+  //               <FormHelperText error={true} id="component-helper-text">
+  //                 {errors.password}
+  //               </FormHelperText>
+  //             )}
+  //           </FormControl>
+  //           {(
+  //             <FormControlLabel
+  //               control={<Checkbox value="remember" color="primary" />}
+  //               label="Remember me"
+  //             />
+  //           )}
+  //           <ButtonSubmit
+  //             onClick={onSubmit}
+  //             type="submit"
+  //             fullWidth
+  //             variant="contained"
+  //             color="primary"
+  //             disabled={logInProgress}
+  //           >
+  //             Daxil ol
+  //           </ButtonSubmit>
+  //         </StyledForm>
+  //       </StyledPaper>
+  //     </MainLayout>
+  //   </Fragment>
+  // );
   return (
-    <Fragment>
-      <CssBaseline />
-      <MainLayout>
-        <StyledPaper>
-          <img src={logo} />
-          {errors.summary && (
-            <FormHelperText error={true} id="component-helper-text">
-              {errors.summary}
-            </FormHelperText>
-          )}
-          {logInProgress && <CircularProgress size={15} color="secondary" />}
-          <StyledForm>
-            <FormControl margin="normal" required fullWidth>
-              <InputLabel htmlFor="username">İstifadəçi adı</InputLabel>
-              <Input
-                id="username"
-                name="username"
-                autoComplete="email"
-                autoFocus
-                onChange={(event) =>
-                  onChange({
-                    name: event.target.name,
-                    value: event.target.value,
-                  })
-                }
-                value={username}
-              />
-              {errors.username && (
-                <FormHelperText error={true} id="component-helper-text">
-                  {errors.username}
-                </FormHelperText>
-              )}
-            </FormControl>
-            <FormControl margin="normal" required fullWidth>
-              <InputLabel htmlFor="password">Parol</InputLabel>
-              <Input
-                name="password"
-                type="password"
-                id="password"
-                value={password}
-                onChange={(event) =>
-                  onChange({
-                    name: event.target.name,
-                    value: event.target.value,
-                  })
-                }
-                autoComplete="current-password"
-              />
-              {errors.password && (
-                <FormHelperText error={true} id="component-helper-text">
-                  {errors.password}
-                </FormHelperText>
-              )}
-            </FormControl>
-            {(
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-            )}
-            <ButtonSubmit
-              onClick={onSubmit}
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              disabled={logInProgress}
-            >
-              Daxil ol
-            </ButtonSubmit>
-          </StyledForm>
-        </StyledPaper>
-      </MainLayout>
-    </Fragment>
+    <Flex
+      h={"100vh"}
+      // bg="rgba(0, 0, 0, .3)"
+      gap="md"
+      justify="center"
+      align="center"
+      direction="row"
+      wrap="wrap"
+    >
+      <Paper shadow="md" p="lg" sx={{ width: "100%" }}>
+        <form onSubmit={onSubmit} style={{ width: "100%" }}>
+          <TextInput
+            withAsterisk
+            label="İstifadəçi adı"
+            placeholder="İstifadəçi adı"
+            autoComplete="email"
+            id="username"
+            name="username"
+            autoFocus
+            onChange={(event) =>
+              onChange({
+                name: event.target.name,
+                value: event.target.value,
+              })
+            }
+            value={username}
+          />
+          <PasswordInput
+            placeholder="Password"
+            label="Password"
+            withAsterisk
+            name="password"
+            id="password"
+            value={password}
+            onChange={(event) =>
+              onChange({
+                name: event.target.name,
+                value: event.target.value,
+              })
+            }
+            autoComplete="current-password"
+          />
+          {errors.password && <AlertForError errorType={errors?.password} />}
+          <Checkbox
+            mt="md"
+            label="Remember me"
+          />
+
+          <Group position="right" mt="md">
+            <Button type="submit">Daxil ol </Button>
+          </Group>
+        </form>
+        {errors?.summary && <AlertForError errorType={errors?.summary} />}
+      </Paper>
+    </Flex>
   );
 }
 
