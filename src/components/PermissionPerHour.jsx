@@ -78,16 +78,13 @@ const StyledCard = styled(Card)(() => ({
 export default function EmpSaatliqIcaze(props) {
 
   const [data, setData] = useState([]);
-  console.log("SAATLIG", props)
 
   const loadSaatliqIcaze = (id) => {
-    console.log("ID", id)
     ApiHelper.getMethod(
       GET_SAATLIQ_ICAZE + id,
       () => {},
       ToastHelper.error,
       (data) => {
-        console.log("saatliqicaze", data);
         setData(data ? data[0] : []);
       }
     );
@@ -96,7 +93,6 @@ export default function EmpSaatliqIcaze(props) {
     loadSaatliqIcaze(props.empId);
   }, []);
   
-  console.log("dataaaa", data);
   return (
     <StyledCard className={classes.card}>
       <CardContent style={{ padding: "20px" }}>

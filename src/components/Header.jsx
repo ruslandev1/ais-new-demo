@@ -23,13 +23,37 @@ import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp'
 import { AccountCircle } from '@mui/icons-material';
-import { Menu } from '@mui/material';
+import { LinearProgress, Menu } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import { Link } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import {connect} from "react-redux"
 import { logout } from "../actions/loginAction";
+import { connect, useSelector, useDispatch } from 'react-redux'
+import {
+  fetchMenuListInfoIfNeeded,
+  setMenuList,
+  setMenuGroupShow,
+} from "../reducers/MenuReducer";
+import {
+  avrFetch,
+  readResponseAsJSON,
+  validateResponse,
+} from "../utils/AvroraFetch";
+import { BACKEND_URL } from "../utils/Constants";
+import DrawerMenuItems from './DrawerMenuItems';
+import { isEmpty } from '../utils';
 
+
+export class AccInfo {
+  accInfoId = 0;
+  accInfoName = "";
+  accInfoPid = 0;
+  accTypeId = 0;
+  childsPools = [];
+  iconName = "";
+  modName = "";
+  weight = 0;
+}
 
 
 const drawerWidth = 240;
@@ -84,54 +108,124 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 // customizing accordion
 
 const Accordion = styled((props) => (
-    <MuiAccordion disableGutters elevation={0} square {...props}  />
-  ))(({ theme }) => ({
-    border: `1px solid ${theme.palette.divider}`,
-    '&:not(:last-child)': {
-      borderBottom: 0,
-    },
-    '&:before': {
-      display: 'none',
-    },
-  }));
-  
-  const AccordionSummary = styled((props) => (
-    <MuiAccordionSummary
-      expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
-      {...props}
-    />
-  ))(({ theme }) => ({
-    backgroundColor:
-      theme.palette.mode === 'light'
-        ? 'rgba(255, 255, 255, .01)'
-        : 'rgba(0, 0, 0, 0)',
-    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-      transform: 'rotate(180deg)',
-    },
-    '& .MuiAccordionSummary-content': {
-      marginLeft: theme.spacing(1),
-    },'& .MuiAccordionSummary-content': {
-      marginLeft: theme.spacing(1),
-    },
-    '& .MuiAccordionDetails-root': {
-        padding: 0,
-      },
-  }));
-  
-  const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
-    padding: theme.spacing(0),
-    borderTop: '1px solid rgba(0, 0, 0, .125)',
-    '& .css-10hburv-MuiTypography-root': {
-        fontSize: "0.875rem"
-      },
-  }));
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  '&:not(:last-child)': {
+    borderBottom: 0,
+  },
+  '&:before': {
+    display: 'none',
+  },
+}));
+
+const AccordionSummary = styled((props) => (
+  <MuiAccordionSummary
+    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
+    {...props}
+  />
+))(({ theme }) => ({
+  backgroundColor:
+    theme.palette.mode === 'light'
+      ? 'rgba(255, 255, 255, .01)'
+      : 'rgba(0, 0, 0, 0)',
+  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+    transform: 'rotate(180deg)',
+  },
+  '& .MuiAccordionSummary-content': {
+    marginLeft: theme.spacing(1),
+  }, '& .MuiAccordionSummary-content': {
+    marginLeft: theme.spacing(1),
+  },
+  '& .MuiAccordionDetails-root': {
+    padding: 0,
+  },
+}));
+
+const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+  padding: theme.spacing(0),
+  borderTop: '1px solid rgba(0, 0, 0, .125)',
+  '& .css-10hburv-MuiTypography-root': {
+    fontSize: "0.875rem"
+  },
+}));
 
 
- function Header({isAuthenticated: auth, logOut, user, ...props}) {
+function Header({ isAuthenticated: auth, logOut, user, ...props }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  // const [menuList, setMenuListState] = React.useState(new AccInfo());
+  const [menuComponent, setMenuComponent] = React.useState({})
+
+  const dispatch = useDispatch();
+  const { drawerOpen, menuList, accessState, loginState, menuGroupShow } = useSelector((state) => ({
+    drawerOpen: state.drawerState.drawerOpen,
+    menuList: state.menuList,
+    accessState: state.accessState,
+    loginState: state.loginState,
+    menuGroupShow: state.menuList.menuGroupShow,
+  }));
+
+  const handleMenuItemAction = (data) => {
+    if (data.action === "menuItemGroupClick") {
+      setMenuGroupShow(data.payload);
+    }
+  };
+
+
+  React.useEffect(() => {
+    if (loginState.isAuthenticated && !loginState.logInProgress) {
+      console.log("Fetching menu list...");
+      dispatch(fetchMenuListInfoIfNeeded());
+    }
+  }, [dispatch, loginState]);
+
+  React.useEffect(() => {
+    console.log("Fetching menus...");
+    if (!isEmpty(menuList)) return
+    avrFetch(BACKEND_URL + "/api/AccPool/GetMenuList")
+      .then(validateResponse)
+      .then(readResponseAsJSON)
+      .then((response) => {
+        if (!isEmpty(response) && response.success === true) {
+          dispatch(setMenuList(response.data));
+          console.log("menuList", response.data)
+        }
+      })
+      .catch((reason) => {
+        console.error(reason)
+      });
+
+  }, [menuList, dispatch]);
+
+  if (
+    !accessState ||
+    !accessState.loaded ||
+    accessState.isFetching ||
+    accessState.didInvalidate ||
+    !menuList ||
+    menuList.didInvalidate ||
+    !menuList.loaded
+  ) {
+    if (loginState.isAuthenticated && !loginState.logInProgress) {
+      console.log("qalsinburda");
+      fetchMenuListInfoIfNeeded();
+    }
+    // return (
+    //   <>
+    //     <LinearProgress />
+    //     Menu yüklənir...
+    //   </>
+    // );
+  }
+  console.log("Budakecdi");
+  if (isEmpty(menuList)) return <Fragment />;
+  console.log(
+    "props.menuList: ",
+    menuList.childsPools
+  );
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -162,12 +256,12 @@ const Accordion = styled((props) => (
     logOut(user);
   };
   const handleResetSession = () => {
-    setAnchorEl({anchorEl : null})
+    setAnchorEl({ anchorEl: null })
   }
   return (
     <CssBaseline>
       <AppBar position="fixed" open={open}>
-        <Toolbar sx={{justifyContent: "space-between"}}>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -180,39 +274,39 @@ const Accordion = styled((props) => (
           <Typography variant="h6" noWrap component="div">
             {props.moduleTitle}
           </Typography>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-              transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleProfile}>
-                  <RouterLink to="/profile">Profil</RouterLink>
-                </MenuItem>
-                <MenuItem onClick={handleResetSession}>
-                <RouterLink to="/settings">Tənzimləmə</RouterLink>
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>Çıxış</MenuItem>
-              </Menu>
+          <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenu}
+            color="inherit"
+          >
+            <AccountCircle />
+          </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={handleProfile}>
+              <RouterLink to="/profile">Profil</RouterLink>
+            </MenuItem>
+            <MenuItem onClick={handleResetSession}>
+              <RouterLink to="/settings">Tənzimləmə</RouterLink>
+            </MenuItem>
+            <MenuItem onClick={handleLogout}>Çıxış</MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -233,7 +327,7 @@ const Accordion = styled((props) => (
           </IconButton>
         </DrawerHeader>
         <Divider />
-        <List>
+        {/* <List>
           {[props.moduleTitle].map((text, index) => (
             <RouterLink to="/" key={index + "_rscl"}>
             <Link  key={index + "_scl"} disablePadding  underline='none' sx={{color: "black"}}>
@@ -246,10 +340,15 @@ const Accordion = styled((props) => (
             </Link>
             </RouterLink>
           ))}
-        </List>
+        </List> */}
+        <DrawerMenuItems
+          items={menuList.childsPools}
+          onMenuItemAction={handleMenuItemAction}
+          menuGroupState={menuGroupShow}
+        />
         <Divider />
-         {/* Accordion menu */}
-         <div>
+        {/* Accordion menu */}
+        {/* <div>
       <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}  >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -304,11 +403,32 @@ const Accordion = styled((props) => (
         </List>
         </AccordionDetails>
       </Accordion>
-    </div>
+    </div> */}
       </Drawer>
     </CssBaseline>
   );
 }
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    fetchMenuListInfoIfNeeded: () => {
+      dispatch(fetchMenuListInfoIfNeeded());
+    },
+    fromStoreCloseDrawer: () => {
+      dispatch({ type: CLOSE_DRAWER });
+    },
+    logOut: (usrname) => {
+      dispatch(logout(usrname));
+    },
+    fromStoreOpenDrawer: () => {
+      dispatch({
+        type: OPEN_DRAWER,
+      });
+    },
+    setMenuList: (list) => dispatch(setMenuList(list)),
+    setMenuGroupShow: (data) => dispatch(setMenuGroupShow(data)),
+  };
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -319,17 +439,5 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    logOut: (usrname) => {
-      dispatch(logout(usrname));
-    },
-    fromStoreOpenDrawer: () => {
-      dispatch({
-        type: OPEN_DRAWER,
-      });
-    },
-  };
-};
 
 export default (connect(mapStateToProps, mapDispatchToProps)(Header));

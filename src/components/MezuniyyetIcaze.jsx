@@ -91,7 +91,6 @@ const EmpMezuniyyet = (props) => {
       () => {},
       ToastHelper.error,
       (data) => {
-        console.log("data", data);
         
         setData(data);
       }
@@ -109,7 +108,6 @@ const EmpMezuniyyet = (props) => {
     );
   };
 
-  console.log('year236',year);
 
   // useEffect(() => {
   //   console.log('useeffect year',year);

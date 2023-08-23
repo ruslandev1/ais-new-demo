@@ -33,13 +33,13 @@ const Mainlayout = styled('main')(({ theme }) => ({
 }));
 
 
-const PageWrapper = ({component}) => {
+const PageWrapper = ({component, classes, ...rest}) => {
     console.log("component", component)
     return (
         <div id={"idPageWrapper"}>
             <CssBaseline>
                     <Appframe>
-                        <Header />
+                        <Header {...rest}/>
                         <Mainlayout>
                             {component}
                         </Mainlayout>
