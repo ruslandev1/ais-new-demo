@@ -5,6 +5,7 @@ import {
     Text,
     createStyles,
   } from '@mantine/core';
+import { Link } from 'react-router-dom';
   import { ChevronRight } from 'tabler-icons-react';
 
 
@@ -27,6 +28,7 @@ import {
     const { classes } = useStyles();
   
     return (
+      <Link to="/profile">
       <UnstyledButton className={classes.user} {...others}>
         <Group>
           <Avatar src={image} radius="xl" />
@@ -44,5 +46,6 @@ import {
           {icon || <ChevronRight size="0.9rem" stroke={1.5} />}
         </Group>
       </UnstyledButton>
+      </Link>
     );
   }

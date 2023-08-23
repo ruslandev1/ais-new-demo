@@ -36,7 +36,6 @@ export default function EmpInventar(props) {
       () => {},
       ToastHelper.error,
       (data) => {
-        console.log('invdata',data);
          setResults(data??[]);
       }
     );
@@ -47,7 +46,6 @@ export default function EmpInventar(props) {
       () => {},
       ToastHelper.error,
       (data) => {
-        console.log('invreportdata',data);
         setReportList(data??[]);
       }
     );
