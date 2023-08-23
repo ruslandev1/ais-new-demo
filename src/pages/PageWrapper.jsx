@@ -7,7 +7,6 @@ import { styled } from '@mui/material/styles';
 import { connect } from "react-redux";
 
 
-
 const Appframe = styled('Appframe')(({ theme }) => ({
     zIndex: 1,
     position: 'relative',
@@ -33,12 +32,12 @@ const Mainlayout = styled('main')(({ theme }) => ({
 }));
 
 
-const PageWrapper = ({component}) => {
+const PageWrapper = ({component, ...props}) => {
     console.log("component", component)
     return (
         <div id={"idPageWrapper"}>
                     <Appframe>
-                        <Header />
+                        <Header empId={props.user.empId}/>
                         <Mainlayout>
                             {component}
                         </Mainlayout>
@@ -48,8 +47,15 @@ const PageWrapper = ({component}) => {
     );
 }
 
+function mapStateToProps(state) {
+    return {
+      user: state.loginState.user,
+    };
+  }
+
+export default connect(mapStateToProps)(PageWrapper);
 
 
 
-export default PageWrapper;
+
 

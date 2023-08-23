@@ -20,18 +20,31 @@ import { Link } from 'react-router-dom';
         backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
       },
     },
+
+    profile_image : {
+        maxWidth : "100%"
+    }
   }));
   
 
   
-  export function UserButton({ image, name, email, icon, ...others }) {
+  export function UserButton({ image, name, email, icon, imgRef , ...others }) {
     const { classes } = useStyles();
-  
+
     return (
       <Link to="/profile">
       <UnstyledButton className={classes.user} {...others}>
         <Group>
-          <Avatar src={image} radius="xl" />
+          <Avatar radius="xl">     
+          <a href="#" onClick={(e) => handleClickOpen(e)}>
+          <img
+            ref={imgRef}
+            className={classes.profile_image}
+            src="http://www.markweb.in/primehouseware/images/noimage.png"
+            alt="..."
+          />
+        </a>
+          </Avatar>
   
           <div style={{ flex: 1 }}>
             <Text size="sm" weight={500}>

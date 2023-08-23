@@ -74,10 +74,8 @@ function LinksGroup({ icon: Icon, initiallyOpened, links, ...props }) {
 
   const items = props.items === null ? [] : props.items;
 
-  // console.log("ITEMS", items)
   function listItemGenerator(fetchItem) {
     return fetchItem?.map(item => {
-      console.log(item)
       if (item.accTypeId === 2 || item.accTypeId === 4) {
         return itemList(item);
       }

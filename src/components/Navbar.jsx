@@ -12,13 +12,15 @@ import { UserButton } from './UserButton';
 import LinksGroup from './NavbarLinksGroup';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   fetchMenuListInfoIfNeeded,
   setMenuList,
   setMenuGroupShow,
 } from "../reducers/MenuReducer";
 import { isEmpty } from '../utils';
+import { avrFetch, readResponseAsBlob, validateResponse } from '../utils/AvroraFetch';
+import { BACKEND_URL } from '../utils/Constants';
 
 
 
@@ -68,30 +70,38 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 export function NavbarNested(props) {
+  const [empData, setEmpData] = useState({
+    empId: props.empId,
+    // ... (initialize other properties)
+  });
 
+  const imgRef = useRef(null);
 
- function loadProfileImg() {
-    avrFetch(BACKEND_URL + "/api/User/img/", {
-      cache: "default",
-    })
+  console.log("empData", empData)
+
+  const loadProfileImg = () => {
+    avrFetch(BACKEND_URL + "/api/User/imgbyid/" + empData.empId)
       .then(validateResponse)
       .then(readResponseAsBlob)
       .then((myBlob) => {
         const file = new Blob([myBlob], { type: "image/jpeg" });
         let fileUrl = (window.URL || window.webkitURL).createObjectURL(file);
-        this.imgRef.current.src = fileUrl;
+        imgRef.current.src = fileUrl;
       })
       .catch((reason) =>
-        this.setState(
-          Object.assign({}, this.state, {
-            loading: false,
-            errors: reason.message,
-          })
-        )
+        setEmpData((prevEmpData) => ({
+          ...prevEmpData,
+          loading: false,
+          errors: reason.message,
+        }))
       );
-  }
-
+  };
   const dispatch = useDispatch()
+
+   useEffect(() => {
+      loadProfileImg();
+   }, [])
+   
 
 
   const { drawerOpen, menuList, accessState, loginState, menuGroupShow } = useSelector((state) => ({
@@ -164,7 +174,6 @@ export function NavbarNested(props) {
   };
 
   const { classes } = useStyles();
-  console.log('menuList', menuList.childsPools)
 
   return (
     <Navbar height={800} width={{ sm: 300 }} p="md" className={classes.navbar} >
@@ -187,6 +196,7 @@ export function NavbarNested(props) {
         <UserButton
           image="http://www.markweb.in/primehouseware/images/noimage.png"
           name={`${loginState.user.firstName} ${loginState.user.lastName}`}
+          imgRef={imgRef}
         />
       </Navbar.Section>
     </Navbar>
