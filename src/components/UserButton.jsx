@@ -47,12 +47,8 @@ import { Link } from 'react-router-dom';
           </Avatar>
   
           <div style={{ flex: 1 }}>
-            <Text size="sm" weight={500}>
+            <Text size="sm" weight={700}>
               {name}
-            </Text>
-  
-            <Text color="dimmed" size="xs">
-              {email}
             </Text>
           </div>
   

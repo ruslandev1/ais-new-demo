@@ -1,25 +1,16 @@
-import { Navbar, Group, Text, ScrollArea, createStyles, rem} from '@mantine/core';
-import {
-  Notes,
-  CalendarStats,
-  Gauge,
-  PresentationAnalytics,
-  FileAnalytics,
-  Adjustments,
-  Lock,
-} from "tabler-icons-react"
-import { UserButton } from './UserButton';
+import { Navbar, Group, Text, ScrollArea, createStyles, rem, getStylesRef, Button, UnstyledButton } from '@mantine/core';
+import { SwitchHorizontal, Logout, User } from 'tabler-icons-react';
 import LinksGroup from './NavbarLinksGroup';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import {
   fetchMenuListInfoIfNeeded,
   setMenuList,
   setMenuGroupShow,
 } from "../reducers/MenuReducer";
 import { isEmpty } from '../utils';
-import { avrFetch, readResponseAsBlob, validateResponse } from '../utils/AvroraFetch';
+import { avrFetch, validateResponse } from '../utils/AvroraFetch';
 import { BACKEND_URL } from '../utils/Constants';
 
 
@@ -40,11 +31,12 @@ const useStyles = createStyles((theme) => ({
   navbar: {
     backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.white,
     paddingBottom: 0,
+    justifyContent : "space-between"
   },
 
   header: {
     padding: theme.spacing.md,
-    paddingTop: 0,
+    paddingTop: 10,
     marginLeft: `calc(${theme.spacing.md} * -1)`,
     marginRight: `calc(${theme.spacing.md} * -1)`,
     color: theme.colorScheme === 'dark' ? theme.white : theme.black,
@@ -62,47 +54,46 @@ const useStyles = createStyles((theme) => ({
     paddingBottom: theme.spacing.xl,
   },
 
-  footer: {
+  footer2: {
     marginLeft: `calc(${theme.spacing.md} * -1)`,
     marginRight: `calc(${theme.spacing.md} * -1)`,
     borderTop: `${rem(1)} solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
       }`,
   },
-}));
-export function NavbarNested(props) {
-  const [empData, setEmpData] = useState({
-    empId: props.empId,
-    // ... (initialize other properties)
-  });
-
-  const imgRef = useRef(null);
-
-  console.log("empData", empData)
-
-  const loadProfileImg = () => {
-    avrFetch(BACKEND_URL + "/api/User/imgbyid/" + empData.empId)
-      .then(validateResponse)
-      .then(readResponseAsBlob)
-      .then((myBlob) => {
-        const file = new Blob([myBlob], { type: "image/jpeg" });
-        let fileUrl = (window.URL || window.webkitURL).createObjectURL(file);
-        imgRef.current.src = fileUrl;
-      })
-      .catch((reason) =>
-        setEmpData((prevEmpData) => ({
-          ...prevEmpData,
-          loading: false,
-          errors: reason.message,
-        }))
-      );
-  };
-  const dispatch = useDispatch()
-
-   useEffect(() => {
-      loadProfileImg();
-   }, [])
+  footer: {
+    paddingTop: theme.spacing.md,
+    marginTop: theme.spacing.md,
+    borderTop: `${rem(1)} solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]
+      }`,
+    //  backgroundColor : 'black',
+     marginBottom : 40
+  },
    
+  link: {
+    ...theme.fn.focusStyles(),
+    display: 'flex',
+    alignItems: 'center',
+    textDecoration: 'none',
+    fontSize: theme.fontSizes.sm,
+    color: theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7],
+    padding: `${theme.spacing.sm} ${theme.spacing.sm}`,
+    borderRadius: theme.radius.sm,
+    fontWeight: 700,
 
+    '&:hover': {
+      backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+      color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+
+      [`& .${getStylesRef('icon')}`]: {
+        color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+      },
+    },
+  },
+}));
+
+
+export function NavbarNested(props) {
+  const dispatch = useDispatch()
 
   const { drawerOpen, menuList, accessState, loginState, menuGroupShow } = useSelector((state) => ({
     drawerOpen: state.drawerState.drawerOpen,
@@ -112,7 +103,7 @@ export function NavbarNested(props) {
     menuGroupShow: state.menuList.menuGroupShow,
   }));
 
-  console.log('LOGINSTATE-NAVBAR', loginState)
+  console.log('LOGINSTATE-NAVBAR', props)
 
 
   const handleMenuItemAction = (data) => {
@@ -176,28 +167,42 @@ export function NavbarNested(props) {
   const { classes } = useStyles();
 
   return (
-    <Navbar height={800} width={{ sm: 300 }} p="md" className={classes.navbar} >
+    <Navbar width={{ sm: 300 }} p="md" className={classes.navbar} sx={{ zIndex: 0 }} >
       <Navbar.Section className={classes.header} >
         <Group position="apart">
           <Text fz="lg">{props.moduleTitle}</Text>
         </Group>
       </Navbar.Section>
 
-      <Navbar.Section grow className={classes.links} component={ScrollArea}>
+      <Navbar.Section grow className={classes.links} display="flex">
         <LinksGroup
           items={menuList.childsPools}
           onMenuItemAction={handleMenuItemAction}
           menuGroupState={menuGroupShow}
         />
-        {/* <div className={classes.linksInner}><Link to={links.link}>{links}</Link></div> */}
       </Navbar.Section>
 
-      <Navbar.Section className={classes.footer}>
-        <UserButton
-          image="http://www.markweb.in/primehouseware/images/noimage.png"
-          name={`${loginState.user.firstName} ${loginState.user.lastName}`}
-          imgRef={imgRef}
-        />
+      <Navbar.Section  className={classes.footer}>
+      <Link to="/profile" className={classes.link}>
+          <Group>
+          <User />
+          <span>Profil</span>
+          </Group>
+        </Link>
+
+        <Link to="/settings" className={classes.link}>
+          <Group>
+          <SwitchHorizontal />
+          <span>Tənzimləmə</span>
+          </Group>
+        </Link>
+
+        <UnstyledButton className={classes.link} sx={{ width: "100%" }} onClick={props.handleLogout}>
+          <Group >
+          <Logout />
+          <span>Çıxış</span>
+          </Group>
+        </UnstyledButton>
       </Navbar.Section>
     </Navbar>
   );

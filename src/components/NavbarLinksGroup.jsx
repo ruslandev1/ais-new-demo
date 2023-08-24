@@ -1,24 +1,15 @@
 import { useState } from 'react';
 import {
-  Group,
   Box,
-  ThemeIcon,
-  UnstyledButton,
   createStyles,
   rem,
   NavLink,
   Text,
-  Collapse,
   Divider,
   Flex
 } from '@mantine/core';
-import { CalendarStats, ChevronLeft, ChevronRight, Gauge } from 'tabler-icons-react';
+import { ChevronLeft, ChevronRight, Home2 } from 'tabler-icons-react';
 import { Link } from 'react-router-dom';
-import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import Icon from "@mui/material/Icon/Icon";
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Home2 } from 'tabler-icons-react';
 
 const useStyles = createStyles((theme) => ({
   control: {
@@ -64,6 +55,12 @@ const useStyles = createStyles((theme) => ({
   nested: {
     paddingLeft: '1.25rem'
   }
+  ,
+  navlinks: {
+    flexGrow: 5,
+    // height: 700,
+    marginTop: 20
+  }
 
 }));
 
@@ -86,15 +83,15 @@ function LinksGroup({ icon: Icon, initiallyOpened, links, ...props }) {
   }
 
   return (
-    <Text >{listItemGenerator(items)}</Text>
+    <Box className={classes.navlinks} >{listItemGenerator(items)}</Box>
   );
 
   function itemList(accInfo) {
     // console.log("ACCINFO", accInfo)
     return (
       <Link to={accInfo.modName}>
-        <Flex wrap="nowrap" direction="row-reverse" justify="center" align="center" sx={{ marginLeft: 20 }}>
-          <NavLink key={'listItem_' + accInfo.accInfoId} dense={true} label={accInfo.accInfoName} />
+        <Flex wrap="nowrap" direction="row-reverse" justify="center" align="center" sx={{ marginLeft: 20, }}>
+          <NavLink key={'listItem_' + accInfo.accInfoId} label={accInfo.accInfoName} />
           {/* <ListItemIcon style={{ minWidth: 35 }}>
           <span className='material-icons'>{accInfo.iconName}</span>
         </ListItemIcon> */}
@@ -107,8 +104,8 @@ function LinksGroup({ icon: Icon, initiallyOpened, links, ...props }) {
   function listGroup(item, nodes) {
     const open = props.menuGroupState[item.accInfoId];
     return (
-      <Box key={'frg_' + item.accInfoId}>
-        <Divider/>
+      <Box key={'frg_' + item.accInfoId} >
+        <Divider />
         <NavLink
           key={'grpListItem_' + item.accInfoId}
           onClick=
@@ -119,6 +116,7 @@ function LinksGroup({ icon: Icon, initiallyOpened, links, ...props }) {
             }
             )}
           label={item.accInfoName}
+          
         >
           {nodes}
         </NavLink>
@@ -126,17 +124,6 @@ function LinksGroup({ icon: Icon, initiallyOpened, links, ...props }) {
       </Box>
     );
   }
-  // const items = (hasLinks ? links : []).map((link) => (
-  //   <Link to={link.link}>
-  //   <NavLink
-  //   label={link.label}
-  //   className={classes.link}
-  //   key={link.label}
-  //   sx={{maxWidth : "90%"}}
-  //   />
-  //   </Link>
-  // ));
-
 
 
 

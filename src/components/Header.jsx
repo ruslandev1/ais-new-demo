@@ -1,13 +1,9 @@
 import * as React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-import {connect} from "react-redux"
+import { connect } from "react-redux"
 import { logout } from "../actions/loginAction";
 import { NavbarNested } from './Navbar';
 
-
-
-
- function Header({isAuthenticated: auth, logOut, user, ...props}) {
+function Header({ isAuthenticated: auth, logOut, user, ...props }) {
   const [open, setOpen] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -41,10 +37,10 @@ import { NavbarNested } from './Navbar';
     logOut(user);
   };
   const handleResetSession = () => {
-    setAnchorEl({anchorEl : null})
+    setAnchorEl({ anchorEl: null })
   }
   return (
-    <NavbarNested {...props}/>
+    <NavbarNested {...props} handleLogout={handleLogout}/>
   );
 }
 
