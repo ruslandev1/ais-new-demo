@@ -37,8 +37,8 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path : "/shorcut-links",
-    element : <ShortLinkPage/>
+    path : "/shortcut-links",
+    element : <ProtectedRoute component={<ShortLinkPage />}/>
   },
   {
     path : "/profile",
@@ -60,13 +60,11 @@ function App({loadAuthToken}) {
   
 
   return (
-    <div className='main-wrapper'>
     <MantineProvider withGlobalStyles withNormalizeCSS> 
       <ThemeProvider theme={theme}>
       <RouterProvider router={router} />
       </ThemeProvider>
       </MantineProvider>
-    </div>
   )
 }
 
