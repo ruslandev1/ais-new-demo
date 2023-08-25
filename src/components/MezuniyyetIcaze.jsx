@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { styled } from '@mui/material/styles';
-import Card from "@mui/material/Card";
+// import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { BACKEND_URL } from "../utils/Constants";
 import ApiHelper from "../utils/ApiHelper";
 import ToastHelper from "../utils/ToastHelper";
+import { createStyles, Text, Card, RingProgress, Group, rem } from '@mantine/core';
+
 
 const PREFIX = 'EmpMezuniyyet';
 
@@ -187,6 +189,88 @@ const EmpMezuniyyet = (props) => {
       </CardContent>
     </StyledCard>
   );
+
+
+  const useStyles = createStyles((theme) => ({
+    card: {
+      backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+    },
+  
+    label: {
+      fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+      fontWeight: 700,
+      lineHeight: 1,
+    },
+  
+    lead: {
+      fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+      fontWeight: 700,
+      fontSize: rem(22),
+      lineHeight: 1,
+    },
+  
+    inner: {
+      display: 'flex',
+  
+      [theme.fn.smallerThan('xs')]: {
+        flexDirection: 'column',
+      },
+    },
+  
+    ring: {
+      flex: 1,
+      display: 'flex',
+      justifyContent: 'flex-end',
+  
+      [theme.fn.smallerThan('xs')]: {
+        justifyContent: 'center',
+        marginTop: theme.spacing.md,
+      },
+    },
+  }));
+  
+  
+    // const { classes, theme } = useStyles();
+  // return (
+  //   <Card withBorder p="xl" radius="md" className={classes.card}>
+  //     <div className={classes.inner}>
+  //       <div>
+  //         <Text fz="xl" className={classes.label}>
+  //           İstifadə edilə bilər
+  //           : {data.canBeUsedIcaze}
+  //         </Text>
+  //         <div>
+  //           <Text className={classes.lead} mt={30}>
+  //             {data.canBeUsedIcaze}
+  //           </Text>
+  //           <Text fz="xs" color="dimmed">
+  //             Completed
+  //           </Text>
+  //         </div>
+  //         {/* <Group mt="lg">{items}</Group> */}
+  //       </div>
+
+  //       <div className={classes.ring}>
+  //         <RingProgress
+  //           roundCaps
+  //           thickness={6}
+  //           size={150}
+  //           sections={[{ value: (data.canBeUsedIcaze) * 100, color: theme.primaryColor }]}
+  //           label={
+  //             <div>
+  //               <Text ta="center" fz="lg" className={classes.label}>
+  //                 {((data.canBeUsedIcaze) * 100).toFixed(0)}%
+  //               </Text>
+  //               <Text ta="center" fz="xs" c="dimmed">
+  //                 Completed
+  //               </Text>
+  //             </div>
+  //           }
+  //         />
+  //       </div>
+  //     </div>
+  //   </Card>
+  // );
 };
 
 export default EmpMezuniyyet;

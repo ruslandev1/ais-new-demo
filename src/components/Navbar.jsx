@@ -12,6 +12,7 @@ import {
 import { isEmpty } from '../utils';
 import { avrFetch, validateResponse } from '../utils/AvroraFetch';
 import { BACKEND_URL } from '../utils/Constants';
+import { useQuery } from '@tanstack/react-query';
 
 
 
@@ -93,6 +94,8 @@ const useStyles = createStyles((theme) => ({
 
 
 export function NavbarNested(props) {
+  
+  
   const dispatch = useDispatch()
 
   const { drawerOpen, menuList, accessState, loginState, menuGroupShow } = useSelector((state) => ({
@@ -103,7 +106,6 @@ export function NavbarNested(props) {
     menuGroupShow: state.menuList.menuGroupShow,
   }));
 
-  console.log('LOGINSTATE-NAVBAR', props)
 
 
   const handleMenuItemAction = (data) => {
@@ -121,22 +123,22 @@ export function NavbarNested(props) {
   }, [dispatch, loginState]);
 
 
-  useEffect(() => {
-    console.log("Fetching menus...");
-    if (!isEmpty(menuList)) return
-    avrFetch(BACKEND_URL + "/api/AccPool/GetMenuList")
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((response) => {
-        if (!isEmpty(response) && response.success === true) {
-          dispatch(setMenuList(response.data));
-        }
-      })
-      .catch((reason) => {
-        console.error(reason)
-      });
 
-  }, [menuList, dispatch]);
+  const fetchMenuList = async () => {
+    const response = await avrFetch(BACKEND_URL + '/api/AccPool/GetMenuList');
+    const data = await response.json();
+    return data;
+  };
+
+  const { data: fetchedMenuList, isLoading, isError } = useQuery('menuList', fetchMenuList);
+
+
+  useEffect(() => {
+    if (fetchedMenuList && fetchedMenuList.success === true) {
+      dispatch(setMenuList(fetchedMenuList.data));
+    }
+  }, [fetchedMenuList, dispatch]);
+
 
   if (
     !accessState ||
@@ -148,7 +150,6 @@ export function NavbarNested(props) {
     !menuList.loaded
   ) {
     if (loginState.isAuthenticated && !loginState.logInProgress) {
-      console.log("qalsinburda");
       fetchMenuListInfoIfNeeded();
     }
   }

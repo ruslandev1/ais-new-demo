@@ -2,9 +2,6 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { styled } from '@mui/material/styles';
 import {
   avrFetch,
-  readResponseAsBlob,
-  readResponseAsJSON,
-  validateResponse,
 } from "../../utils/AvroraFetch";
 import { BACKEND_URL } from "../../utils/Constants";
 import Grid from "@mui/material/Grid";
@@ -27,11 +24,10 @@ import {
   DialogContent,
   DialogTitle,
 } from "../reportV2/DialogHelper";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import ImageUpload from "../imageUpload";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { useQuery } from "@tanstack/react-query";
+import { Text } from "@mantine/core";
 const PREFIX = 'EmpProfile';
 
 const classes = {
@@ -69,384 +65,124 @@ const Avatar = styled(MuiAvatar)(({ theme }) => ({
 }));
 // add plugin to dayjs
 
-const CardMedia = styled(MuiCardMedia)(({ theme}) => ({
+const CardMedia = styled(MuiCardMedia)(({ theme }) => ({
   '& .card-text': {
-    paddingBottom : "20px"
+    paddingBottom: "20px"
   },
 }))
 
 dayjs.extend(utc)
 
 function EmpProfile(props) {
-  const [empData, setEmpData] = useState({
-    empId: props.empId,
-    username: "",
-    // ... (initialize other properties)
-  });
-
-
-  const [empPos, setEmpPos] = useState([]);
-  const [empContact, setEmpContact] = useState([]);
-  const [empChildren, setEmpChildren] = useState([]);
-  const [empWorkExperience, setEmpWorkExperience] = useState([]);
-
-  const [empEdu, setEmpEdu] = useState({
-    empInst: [],
-    empCourse: [],
-    empCertificate: [],
-  });
-  const [langSkills, setLangSkills] = useState([]);
-  const [compSkills, setCompSkills] = useState([]);
-
-  // ... (other state variables)
-
-  const [empCurrentPos, setEmpCurrentPos] = useState({
-    empPosId: 0,
-    depTitle: "",
-    posTitle: "",
-    startDate: 0,
-  });
-
-
-  const a = dayjs();
   const imgRef = useRef(null);
-
-
-
-
   const [open, setOpen] = useState(true)
   // handle \
   const handleClose = () => {
     setOpen(false);
   };
-
-  const loadProfileImg = () => {
-    avrFetch(BACKEND_URL + "/api/User/imgbyid/" + empData.empId)
-      .then(validateResponse)
-      .then(readResponseAsBlob)
-      .then((myBlob) => {
-        const file = new Blob([myBlob], { type: "image/jpeg" });
-        let fileUrl = (window.URL || window.webkitURL).createObjectURL(file);
-        imgRef.current.src = fileUrl;
-      })
-      .catch((reason) =>
-        setEmpData((prevEmpData) => ({
-          ...prevEmpData,
-          loading: false,
-          errors: reason.message,
-        }))
-      );
-  };
-  const loadEmpData = () => {
-    avrFetch(BACKEND_URL + "/api/Employee/GetProfileData/" + empData.empId)
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const employeeData = { ...value.data };
-          if (empData.empId > 0) {
-            setEmpData((prevEmpData) => ({
-              ...prevEmpData,
-              employeeData,
-            }));
-          }
-        } else {
-          // Handle error or update state accordingly
-          // For example: setErrorState(value.ResponseMessage);
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      }
-      )
+  
+  // Adding image blob
+  const fetchProfileImg = async () => {
+    const response = await avrFetch(`${BACKEND_URL}/api/User/img/`, {
+      cache: "default",
+    });
+    const image = await response.blob()
+    const file = new Blob([image], { type: "image/jpeg" });
+    let fileUrl = (window.URL || window.webkitURL).createObjectURL(file)
+    imgRef.current.src = fileUrl;
+    return image
   };
 
 
-  const loadEmpPos = () => {
-    avrFetch(
-      BACKEND_URL + "/api/EmpPosition/GetPositionsByEmpId?empId=" + empData.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const updatedEmpPos = value.data.map((item) => ({
-            empPosId: item.empPosId,
-            depTitle: item.dep.label,
-            posTitle: item.pos.label,
-            startDate: item.startDate,
-          }));
-          setEmpPos(updatedEmpPos);
-        } else {
-          // Handle error or update state accordingly
-          // For example: setErrorState(value.responseMessage);
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      });
+  // for fetching all queries
+  async function fetchQuery(url) {
+    const response = await avrFetch(BACKEND_URL + `${url}${props.empId}`);
+    const data = await response.json();
+    return data;
+  }
+
+
+  // calling image query
+  const profileImgQuery = useQuery(["profileImg"], fetchProfileImg)
+
+
+  // Fetching employee data
+  const fetchEmployeeProfileData = async () => {
+    return fetchQuery("/api/Employee/GetProfileData/")
   };
+  const { data: employeeData } = useQuery(['employeeProfileData', props.empId], fetchEmployeeProfileData);
 
-  const loadEmpContact = () => {
-    avrFetch(BACKEND_URL + "/api/Contact/GetContactByEmpId?empId=" + empData.empId)
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const updatedEmpContact = value.data.map((item) => ({
-            contactId: item.contactId,
-            contactType: item.contactType.label,
-            contactText: item.contactText,
-            note: item.note,
-          }));
-          setEmpContact(updatedEmpContact);
-        } else {
-          // Handle error or update state accordingly
-          // For example: setErrorState(value.message);
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      });
+
+
+  // Fetching employee positions
+  const fetchEmployeePositions = async () => {
+    return fetchQuery("/api/EmpPosition/GetPositionsByEmpId?empId=")
   };
+  const { data: empPos } = useQuery(['employeePositions', props.empId], fetchEmployeePositions);
 
 
-  const loadEmpChildren = () => {
-    avrFetch(
-      BACKEND_URL +
-      "/api/EmpChildren/GetChildrenByMotherEmpId?empId=" +
-      empData.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const updatedEmpChildren = value.data.map((item) => ({
-            empChildId: item.empChildId,
-            gender: item.gender.label,
-            birthDate: item.birthDate,
-            yash: item.yash,
-            isSaglamMehdudiyyet: item.isSaglamMehdudiyyet,
-          }));
-          setEmpChildren(updatedEmpChildren);
-        } else {
-          // Handle error or update state accordingly
-          // For example: setErrorState(value.responseMessage);
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      });
+  // Fetching employee contact
+  const fetchEmployeeContact = async () => {
+    return fetchQuery("/api/Contact/GetContactByEmpId?empId=")
   };
+  const { data: empContact } = useQuery(['employeeContact', props.empId], fetchEmployeeContact);
 
-  const loadEmpWorkExperience = () => {
-    avrFetch(
-      BACKEND_URL +
-      "/api/EmpWorkExperience/GetWorkExperienceByEmpId?empId=" +
-      empData.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const updatedEmpWorkExperience = value.data.map((item) => ({
-            empWorkExpId: item.empWorkExpId,
-            startDate: item.startDate,
-            endDate: item.endDate,
-            ymd: item.ymd,
-          }));
-          setEmpWorkExperience(updatedEmpWorkExperience);
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      });
+
+  //Fetching employee children
+  const fetchEmployeeChildren = async () => {
+    return fetchQuery("/api/EmpChildren/GetChildrenByMotherEmpId?empId=")
   };
+  const { data: empChildren } = useQuery(['employeeChildren', props.empId], fetchEmployeeChildren);
 
-  const loadEmpEdu = () => {
-    avrFetch(
-      BACKEND_URL + "/api/Education/GetEducationByEmpId?empId=" + empData.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const updatedEmpInst = value.data.map((item) => ({
-            empEduInfoId: item.empEduInfoId,
-            eduInstName: item.eduInstName,
-            eduInstType:
-              item.eduInstType === null ? "" : item.eduInstType.label,
-            startDate: item.startDate,
-            endDate: item.endDate,
-            score: item.score,
-            ixtisas: item.ixtisas,
-          }));
 
-          setEmpEdu((prevEmpEdu) => ({
-            ...prevEmpEdu,
-            empInst: [...updatedEmpInst],
-          }));
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      });
+  // Fetching employee work experience
+  const fetchEmployeeWorkExperience = async () => {
+    return fetchQuery("/api/EmpWorkExperience/GetWorkExperienceByEmpId?empId=")
   };
-  const loadEmpCourse = () => {
-    avrFetch(BACKEND_URL + "/api/EmpCource/GetCourcesEmpId?empId=" + empData.empId)
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const updatedEmpCourse = value.data.map((item) => ({
-            courseId: item.id,
-            title: item.title,
-            beginDate: item.beginDate,
-            endDate: item.endDate,
-          }));
+  const { data: empWorkExperience } = useQuery(['employeeWorkExperience', props.empId], fetchEmployeeWorkExperience);
 
-          setEmpEdu((prevEmpEdu) => ({
-            ...prevEmpEdu,
-            empCourse: [...prevEmpEdu.empCourse, ...updatedEmpCourse],
-          }));
-          console.log(empCourse)
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      });
+  // Fetching employee education
+  const fetchEmployeeEducation = async () => {
+    return fetchQuery("/api/Education/GetEducationByEmpId?empId=")
   };
-  const loadLangSkills = () => {
-    avrFetch(
-      BACKEND_URL + "/api/LangSkill/GetLangSkillsEmpId?empId=" + empData.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const updatedLangSkills = value.data.map((item) => ({
-            langId: item.id,
-            lang: item.lang.label,
-            langLevel: item.langLevel.label,
-          }));
+  const { data: empEdu } = useQuery(['employeeEducation', props.empId], fetchEmployeeEducation);
 
-          setLangSkills((prevLangSkills) => [
-            ...prevLangSkills,
-            ...updatedLangSkills,
-          ]);
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      });
+
+
+  // Fetching employee courses
+  const fetchEmployeeCourses = async () => {
+    return fetchQuery("/api/EmpCource/GetCourcesEmpId?empId=")
   };
+  const { data: empCourse } = useQuery(['employeeCourses', props.empId], fetchEmployeeCourses);
 
-  const loadEmpCertificate = () => {
-    avrFetch(
-      BACKEND_URL +
-      "/api/EmpCertificate/GetCertificatesByEmpId?empId=" +
-      empData.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const updatedEmpCertificate = value.data.map((item) => ({
-            certificateId: item.id,
-            orgTitle: item.orgTitle,
-            title: item.title,
-            grade: item.grade,
-            date: item.date,
-          }));
 
-          setEmpEdu((prevEmpEdu) => ({
-            ...prevEmpEdu,
-            empCertificate: [...prevEmpEdu.empCertificate, ...updatedEmpCertificate],
-          }));
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      });
+  // Fetching employee language skills
+  const fetchEmployeeLanguageSkills = async () => {
+    return fetchQuery("/api/LangSkill/GetLangSkillsEmpId?empId=")
   };
-  const loadCompSkills = () => {
-    avrFetch(
-      BACKEND_URL + "/api/CompSkill/GetCompSkillsByEmpId?empId=" + empData.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          const updatedCompSkills = value.data.map((item) => ({
-            compId: item.id,
-            comp: item.comp.label,
-            compLevel: item.compLevel.label,
-          }));
+  const { data: langSkills } = useQuery(['employeeLangSkills', props.empId], fetchEmployeeLanguageSkills);
 
-          setCompSkills((prevCompSkills) => [
-            ...prevCompSkills,
-            ...updatedCompSkills,
-          ]);
-        }
-      })
-      .catch((reason) => {
-        // Handle error
-        // For example: setErrorState(reason.message);
-      });
+ // Fetching employee certificate
+  const fetchEmployeeCertificates = async () => {
+    return fetchQuery("/api/EmpCertificate/GetCertificatesByEmpId?empId=")
   };
-  const loadCurrentEmpPos = () => {
-    avrFetch(
-      BACKEND_URL + "/api/EmpPosition/GetEmpPosIsLast?empId=" + empData.empId
-    )
-      .then(validateResponse)
-      .then(readResponseAsJSON)
-      .then((value) => {
-        if (!isEmpty(value) && value.success === true) {
-          setEmpCurrentPos({
-            empPosId: value.data.empPosId,
-            depTitle: value.data.dep.label,
-            posTitle: value.data.pos.label,
-            startDate: value.data.startDate,
-          });
-        } else {
-          // Handle error
-          // For example: setErrorState(value.responseMessage);
-        }
-      })
-      .catch((err) => {
-        // Handle error
-        // For example: setErrorState(err.message);
-      });
+  const { data: empCertificate } = useQuery(['employeeCertificates', props.empId], fetchEmployeeCertificates);
+
+
+  // Fetching computer skills
+  const fetchEmployeeComputerSkills = async () => {
+    return fetchQuery("/api/EmpCertificate/GetCertificatesByEmpId?empId=")
   };
+  const { data: compSkills } = useQuery(['employeeCompSkills', props.empId], fetchEmployeeComputerSkills);
 
-  useEffect(() => {
-    loadEmpData();
-    loadProfileImg();
-    loadEmpPos();
-    loadEmpEdu();
-    loadEmpCourse();
-    loadEmpCertificate();
-    loadEmpContact();
-    loadLangSkills();
-    loadCompSkills();
-    loadEmpChildren();
-    loadCurrentEmpPos();
-    loadEmpWorkExperience();
-  }, []);
+  // Fetching current employee position
+  const fetchCurrentEmployeePosition = async () => {
+    return fetchQuery("/api/EmpPosition/GetEmpPosIsLast?empId=")
+  };
+  const { data: empCurrentPos } = useQuery(['currentEmployeePosition', props.empId], fetchCurrentEmployeePosition);
 
-  const empCourse = empEdu.empCourse;
-  const empCertificate = empEdu.empCertificate;
-  const empInst = empEdu.empInst
-  const { employeeData: emp_data } = empData;
+
+
   return (
     <>
       <Card style={{ marginTop: 50 }}>
@@ -460,19 +196,18 @@ function EmpProfile(props) {
             direction={"row"}
             justifyContent={"flex-start"}
           >
-            <Grid item xs={6}  lg={2} />
+            <Grid item xs={6} lg={2} />
             <Grid item xs={6} lg={10}>
               <Typography variant="h4">
-                {emp_data?.firstName} {emp_data?.lastName}{" "}
+                {employeeData?.data?.firstName} {employeeData?.data?.lastName}{" "}
               </Typography>{" "}
-              {/*style={{color: '#0052cc'}}*/}
               <h2 style={{ color: "" }}>
                 {isEmpty(empCurrentPos)
                   ? ""
-                  : empCurrentPos.posTitle}
+                  : empCurrentPos?.data?.dep.label}
               </h2>
               <p style={{ color: "red" }}>
-                {emp_data?.stateId === 2 ? "işdən azad olunub" : ""}
+                {employeeData?.data?.stateId === 2 ? "işdən azad olunub" : ""}
               </p>
             </Grid>
             <Grid item xs={12} lg={2} >
@@ -489,40 +224,40 @@ function EmpProfile(props) {
               <CardMedia
                 profile
                 square="true"
-                // sx={{padding : 2}}
+              // sx={{padding : 2}}
               >
-                <Typography className="card-text">İstifadəçi adı: {emp_data?.username}</Typography>
+                <Typography className="card-text">İstifadəçi adı: {employeeData?.data?.username}</Typography>
                 <Typography className="card-text">
                   Doğum tarixi:{" "}
-                  {emp_data?.birthDate === 0
+                  {employeeData?.data?.birthDate === 0
                     ? ""
-                    : new Date(emp_data?.birthDate * 1000)
+                    : new Date(employeeData?.data?.birthDate * 1000)
                       .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
                 </Typography>
-                <Typography className="card-text">
+                <Text className="card-text">
                   Struktur qurum:{" "}
                   {isEmpty(empCurrentPos)
                     ? ""
-                    : empCurrentPos.depTitle}
-                </Typography>
+                    : empCurrentPos?.data?.dep.label}
+                </Text>
                 <Typography className="card-text">
                   İşə başladığı tarix:{" "}
-                  {empCurrentPos.startDate === 0
+                  {empCurrentPos?.data?.startDate === 0
                     ? ""
-                    : new Date(empCurrentPos.startDate * 1000)
+                    : new Date(empCurrentPos?.data?.startDate * 1000)
                       .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
                 </Typography>
                 <Typography className="card-text">
-                  Elektron poçt:{" "}
-                  {empContact.map((item) =>
+                  {empContact?.data.map((item) =>
+
                     item.contactType === "Elektron poçt"
-                      ? item.contactText
+                      ? <p>{`Elektron poçt:  ${item.contactText}`}</p>
                       : ""
                   )}
                 </Typography>
                 <Typography className="card-text">
                   Mobil telefon:
-                  {empContact?.map((contact, idx) => {
+                  {empContact?.data.map((contact, idx) => {
                     return <p>{contact.contactText}</p>
                   })}
                 </Typography>
@@ -540,7 +275,7 @@ function EmpProfile(props) {
                         <label htmlFor="fname">Adı</label>
                         <input
                           disabled="disabled"
-                          value={emp_data?.firstName}
+                          value={employeeData?.data?.firstName}
                           style={inputStyle}
                         />
                       </Grid>
@@ -548,7 +283,7 @@ function EmpProfile(props) {
                         <label htmlFor="lname">Soyadı</label>
                         <input
                           disabled="disabled"
-                          value={emp_data?.lastName}
+                          value={employeeData?.data?.lastName}
                           style={inputStyle}
                         />
                       </Grid>
@@ -556,7 +291,7 @@ function EmpProfile(props) {
                         <label htmlFor="fname">Ata adı</label>
                         <input
                           disabled="disabled"
-                          value={emp_data?.fatherName}
+                          value={employeeData?.data?.fatherName}
                           style={inputStyle}
                         />
                       </Grid>
@@ -565,9 +300,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.username)
+                            isEmpty(employeeData?.data?.username)
                               ? ""
-                              : emp_data?.username
+                              : employeeData?.data?.username
                           }
                           style={inputStyle}
                         />
@@ -577,9 +312,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.citizenship)
+                            isEmpty(employeeData?.data?.citizenship)
                               ? ""
-                              : emp_data?.citizenship
+                              : employeeData?.data?.citizenship
                           }
                           style={inputStyle}
                         />
@@ -589,9 +324,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.regAddress)
+                            isEmpty(employeeData?.data?.regAddress)
                               ? ""
-                              : emp_data?.regAddress.addressTitle
+                              : employeeData?.data?.regAddress.addressTitle
                           }
                           style={inputStyle}
                         />
@@ -601,9 +336,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value=
-                          {emp_data?.birthDate === 0
+                          {employeeData?.data?.birthDate === 0
                             ? ""
-                            : new Date(emp_data?.birthDate * 1000)
+                            : new Date(employeeData?.data?.birthDate * 1000)
                               .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })}
                           style={inputStyle}
                         />
@@ -615,8 +350,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            emp_data?.identityDoc
-                              ? emp_data?.identityDoc
+                            employeeData?.data?.identityDoc
+                              ? employeeData?.data?.identityDoc
                               : ""
                           }
                           style={inputStyle}
@@ -627,8 +362,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            emp_data?.cardNo
-                              ? emp_data?.cardNo
+                            employeeData?.data?.cardNo
+                              ? employeeData?.data?.cardNo
                               : ""
                           }
                           style={inputStyle}
@@ -639,8 +374,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            emp_data?.fin
-                              ? emp_data?.fin
+                            employeeData?.data?.fin
+                              ? employeeData?.data?.fin
                               : ""
                           }
                           style={inputStyle}
@@ -651,9 +386,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.c1Code)
+                            isEmpty(employeeData?.data?.c1Code)
                               ? ""
-                              : emp_data?.c1Code
+                              : employeeData?.data?.c1Code
                           }
                           style={inputStyle}
                         />
@@ -663,8 +398,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            emp_data?.authority
-                              ? emp_data?.authority
+                            employeeData?.data?.authority
+                              ? employeeData?.data?.authority
                               : ""
                           }
                           style={inputStyle}
@@ -675,9 +410,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            emp_data?.dateOfIssue === 0
+                            employeeData?.data?.dateOfIssue === 0
                               ? ""
-                              : new Date(emp_data?.dateOfIssue * 1000)
+                              : new Date(employeeData?.data?.dateOfIssue * 1000)
                                 .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })
                           }
                           style={inputStyle}
@@ -688,9 +423,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            emp_data?.dateOfExpiry === 0
+                            employeeData?.data?.dateOfExpiry === 0
                               ? ""
-                              : new Date(emp_data?.dateOfExpiry * 1000)
+                              : new Date(employeeData?.data?.dateOfExpiry * 1000)
                                 .toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" })
                           }
                           style={inputStyle}
@@ -701,8 +436,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            emp_data?.gender
-                              ? emp_data?.gender
+                            employeeData?.data?.gender
+                              ? employeeData?.data?.gender
                               : ""
                           }
                           style={inputStyle}
@@ -713,9 +448,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.maritalStatus)
+                            isEmpty(employeeData?.data?.maritalStatus)
                               ? ""
-                              : emp_data?.maritalStatus
+                              : employeeData?.data?.maritalStatus
                           }
                           style={inputStyle}
                         />
@@ -727,8 +462,8 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            emp_data?.militaryObliged
-                              ? emp_data?.militaryObliged
+                            employeeData?.data?.militaryObliged
+                              ? employeeData?.data?.militaryObliged
                               : ""
                           }
                           style={inputStyle}
@@ -739,9 +474,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.dsmfCardNo)
+                            isEmpty(employeeData?.data?.dsmfCardNo)
                               ? ""
-                              : emp_data?.dsmfCardNo
+                              : employeeData?.data?.dsmfCardNo
                           }
                           style={inputStyle}
                         />
@@ -751,9 +486,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.placeOfBirth)
+                            isEmpty(employeeData?.data?.placeOfBirth)
                               ? ""
-                              : emp_data?.placeOfBirth.addressTitle
+                              : employeeData?.data?.placeOfBirth.addressTitle
                           }
                           style={inputStyle}
                         />
@@ -765,9 +500,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.curAddress)
+                            isEmpty(employeeData?.data?.curAddress)
                               ? ""
-                              : emp_data?.curAddress.addressTitle
+                              : employeeData?.data?.curAddress.addressTitle
                           }
                           style={inputStyle}
                         />
@@ -777,9 +512,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.kvotaStatus)
+                            isEmpty(employeeData?.data?.kvotaStatus)
                               ? []
-                              : emp_data?.kvotaStatus.map(
+                              : employeeData?.data?.kvotaStatus.map(
                                 (item) => item.familyStatusTitle
                               )
                           }
@@ -793,9 +528,9 @@ function EmpProfile(props) {
                         <input
                           disabled="disabled"
                           value={
-                            isEmpty(emp_data?.xusMezStatus)
+                            isEmpty(employeeData?.data?.xusMezStatus)
                               ? ""
-                              : emp_data?.xusMezStatus
+                              : employeeData?.data?.xusMezStatus
                           }
                           style={inputStyle}
                         />
@@ -818,7 +553,7 @@ function EmpProfile(props) {
                             </StyledTableRow>
                           </TableHead>
                           <TableBody>
-                            {empChildren.map((item) =>
+                            {empChildren?.data?.map((item) =>
                               getChildrenList(item)
                             )}
                           </TableBody>
@@ -848,7 +583,7 @@ function EmpProfile(props) {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {empPos.map((row) => getPosList(row))}
+                            {empPos?.data.map((row) => getPosList(row))}
                           </TableBody>
                         </Table>
                       </Grid>
@@ -866,7 +601,7 @@ function EmpProfile(props) {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {empWorkExperience.map((item) =>
+                          {empWorkExperience?.data.map((item) =>
                             getWorkExperienceList(item)
                           )}
                         </TableBody>
@@ -900,7 +635,7 @@ function EmpProfile(props) {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {empInst.map((row) => getEduList(row))}
+                            {empEdu?.data.map((row) => getEduList(row))}
                           </TableBody>
                         </Table>
                       </Grid>
@@ -916,7 +651,7 @@ function EmpProfile(props) {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {empCourse?.map((row) => getCourseList(row))}
+                            {empCourse?.data?.map((row) => getCourseList(row))}
                           </TableBody>
                         </Table>
                       </Grid>
@@ -936,7 +671,7 @@ function EmpProfile(props) {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {empCertificate.map((row) =>
+                            {empCertificate?.data?.map((row) =>
                               getCertificateList(row)
                             )}
                           </TableBody>
@@ -963,7 +698,8 @@ function EmpProfile(props) {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {empContact.map((item) =>
+                          {empContact?.data.map((item) =>
+                            // <p>{item.contactId}</p>
                             getContactList(item)
                           )}
                         </TableBody>
@@ -986,7 +722,7 @@ function EmpProfile(props) {
                         </Grid>
                         <Table>
                           <TableBody>
-                            {langSkills.map((item) =>
+                            {langSkills?.data?.map((item) =>
                               getLangList(item)
                             )}
                           </TableBody>
@@ -999,7 +735,7 @@ function EmpProfile(props) {
                         </Grid>
                         <Table>
                           <TableBody>
-                            {compSkills.map((item) =>
+                            {compSkills?.data?.map((item) =>
                               getCompList(item)
                             )}
                           </TableBody>
@@ -1026,7 +762,7 @@ function EmpProfile(props) {
         </DialogTitle>
         <DialogContent>
           <ImageUpload
-            empId={emp_data?.empId}
+            empId={employeeData?.data?.empId}
             whenUploaded={() => {
               console.log("img uploaded");
               loadProfileImg();
@@ -1061,7 +797,7 @@ function getEduList(value) {
       <TableCell component="th" scope="row">
         {tarixs + tarixe}
       </TableCell>
-      <TableCell align="right">{value.eduInstType}</TableCell>
+      <TableCell align="right">{value.eduInstType.label}</TableCell>
       <TableCell align="right">{value.eduInstName}</TableCell>
       <TableCell align="right">{value.ixtisas}</TableCell>
       <TableCell align="right">{value.score}</TableCell>
@@ -1114,7 +850,7 @@ function getContactList(value) {
   return (
     <TableRow key={value.contactId}>
       <TableCell component="th" scope="row">
-        {value.contactType}
+        {value.contactType.label}
       </TableCell>
       <TableCell align="right">{value.contactText}</TableCell>
       <TableCell align="right">{value.note}</TableCell>
@@ -1176,9 +912,9 @@ function getPosList(value) {
   return (
     <TableRow key={value.empPosId}>
       <TableCell component="th" scope="row">
-        {value.depTitle}
+        {value.dep.label}
       </TableCell>
-      <TableCell align="right">{value.posTitle}</TableCell>
+      <TableCell align="right">{value.pos.label}</TableCell>
       <TableCell align="right">
         {value.startDate === 0
           ? "..."

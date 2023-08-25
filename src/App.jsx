@@ -22,6 +22,7 @@ import {
   ThemeProvider,
 } from '@mui/material/styles';
 import { MantineProvider} from '@mantine/core';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
@@ -59,12 +60,16 @@ function App({loadAuthToken}) {
   }, [])
   
 
+  const queryClient = new QueryClient()
+
   return (
+    <QueryClientProvider client={queryClient}>
     <MantineProvider withGlobalStyles withNormalizeCSS> 
       <ThemeProvider theme={theme}>
       <RouterProvider router={router} />
       </ThemeProvider>
       </MantineProvider>
+      </QueryClientProvider>
   )
 }
 

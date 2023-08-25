@@ -1,6 +1,6 @@
 import * as React from "react";
 import { styled } from '@mui/material/styles';
-import Card from "@mui/material/Card";
+// import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { makeStyles } from "@mui/material/styles";
@@ -8,7 +8,7 @@ import { BACKEND_URL } from "../utils/Constants";
 import ApiHelper from "../utils/ApiHelper";
 import ToastHelper from "../utils/ToastHelper";
 import { useState, useEffect } from "react";
-import { Text } from "@mantine/core";
+import { createStyles, Text, Card, RingProgress, Group, rem } from '@mantine/core';
 
 const GET_SAATLIQ_ICAZE =
   BACKEND_URL + "/api/EmpIcazeSaat/GetIcazeSaatByEmpId/";
@@ -98,61 +98,153 @@ export default function EmpSaatliqIcaze(props) {
   }, []);
   
   console.log("dataaaa", data);
-  return (
-    <StyledCard className={classes.card}>
-      <CardContent style={{ padding: "20px" }}>
-        <Typography
-          gutterBottom
-          variant="h5"
-          component="div"
-          style={{
-            color: "rgb(144, 202, 249)",
-            marginBottom: "20px",
-            fontStyle: "italic",
-            zIndex: "1000 !important",
-          }}
-        >
-          Saatlıq İcazə Məlumatı
-        </Typography>
-        <Text>Salam</Text>
-        <Typography component={"div"}>
-          <Typography variant="p" component="div" className={classes.title}>
-            İstifadə edilə bilər :
-          </Typography>
-          <Typography
-            component="span"
-            variant="body2"
-            className={classes.content}
-          >
-            {data.canBeUsedIcaze} dəfə
-          </Typography>
-        </Typography>
-        <Typography component={"div"} className={classes.space}>
-          <Typography variant="p" component="div" className={classes.title}>
-            İstifadə edilmiş müddət :
-          </Typography>
-          <Typography
-            component="span"
-            variant="body2"
-            className={classes.content}
-          >
-            {data.canBeUsedIcaze === '2' ? `0  ${data.usedPeriod}` : data.usedPeriod}
-          </Typography>
-        </Typography>
+  // return (
+  //   <StyledCard className={classes.card}>
+  //     <CardContent style={{ padding: "20px" }}>
+  //       <Typography
+  //         gutterBottom
+  //         variant="h5"
+  //         component="div"
+  //         style={{
+  //           color: "rgb(144, 202, 249)",
+  //           marginBottom: "20px",
+  //           fontStyle: "italic",
+  //           zIndex: "1000 !important",
+  //         }}
+  //       >
+  //         Saatlıq İcazə Məlumatı
+  //       </Typography>
+  //       <Text>Salam</Text>
+  //       <Typography component={"div"}>
+  //         <Typography variant="p" component="div" className={classes.title}>
+  //           İstifadə edilə bilər :
+  //         </Typography>
+  //         <Typography
+  //           component="span"
+  //           variant="body2"
+  //           className={classes.content}
+  //         >
+  //           {data.canBeUsedIcaze} dəfə
+  //         </Typography>
+  //       </Typography>
+  //       <Typography component={"div"} className={classes.space}>
+  //         <Typography variant="p" component="div" className={classes.title}>
+  //           İstifadə edilmiş müddət :
+  //         </Typography>
+  //         <Typography
+  //           component="span"
+  //           variant="body2"
+  //           className={classes.content}
+  //         >
+  //           {data.canBeUsedIcaze === '2' ? `0  ${data.usedPeriod}` : data.usedPeriod}
+  //         </Typography>
+  //       </Typography>
 
-        <Typography component={"div"}>
-          <Typography variant="p" component="div" className={classes.title}>
-            Cari Qalıq(bu günə olan) :
-          </Typography>
-          <Typography
-            component="span"
-            variant="body2"
-            className={classes.content}
-          >
-            {data.canBeUsedIcaze === '2' ? '6 saat': data.currentBalance}
-          </Typography>
-        </Typography>
-      </CardContent>
-    </StyledCard>
+  //       <Typography component={"div"}>
+  //         <Typography variant="p" component="div" className={classes.title}>
+  //           Cari Qalıq(bu günə olan) :
+  //         </Typography>
+  //         <Typography
+  //           component="span"
+  //           variant="body2"
+  //           className={classes.content}
+  //         >
+  //           {data.canBeUsedIcaze === '2' ? '6 saat': data.currentBalance}
+  //         </Typography>
+  //       </Typography>
+  //     </CardContent>
+  //   </StyledCard>
+  // );
+
+
+const useStyles = createStyles((theme) => ({
+  card: {
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+  },
+
+  label: {
+    fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+    fontWeight: 700,
+    lineHeight: 1,
+  },
+
+  lead: {
+    fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+    fontWeight: 700,
+    fontSize: rem(22),
+    lineHeight: 1,
+  },
+
+  inner: {
+    display: 'flex',
+
+    [theme.fn.smallerThan('xs')]: {
+      flexDirection: 'column',
+    },
+  },
+
+  ring: {
+    flex: 1,
+    display: 'flex',
+    justifyContent: 'flex-end',
+
+    [theme.fn.smallerThan('xs')]: {
+      justifyContent: 'center',
+      marginTop: theme.spacing.md,
+    },
+  },
+}));
+
+
+  const { classes, theme } = useStyles();
+  // const items = stats.map((stat) => (
+  //   <div key={stat.label}>
+  //     <Text className={classes.label}>{stat.value}</Text>
+  //     <Text size="xs" color="dimmed">
+  //       {stat.label}
+  //     </Text>
+  //   </div>
+  // ));
+
+  return (
+    <Card withBorder p="xl" radius="md" className={classes.card}>
+      <div className={classes.inner}>
+        <div>
+          <Text fz="xl" className={classes.label}>
+            İstifadə edilə bilər
+            : {data.canBeUsedIcaze}
+          </Text>
+          <div>
+            <Text className={classes.lead} mt={30}>
+              {data.canBeUsedIcaze}
+            </Text>
+            <Text fz="xs" color="dimmed">
+              Completed
+            </Text>
+          </div>
+          {/* <Group mt="lg">{items}</Group> */}
+        </div>
+
+        <div className={classes.ring}>
+          <RingProgress
+            roundCaps
+            thickness={6}
+            size={150}
+            sections={[{ value: (data.canBeUsedIcaze) * 100, color: theme.primaryColor }]}
+            label={
+              <div>
+                <Text ta="center" fz="lg" className={classes.label}>
+                  {((data.canBeUsedIcaze) * 100).toFixed(0)}%
+                </Text>
+                <Text ta="center" fz="xs" c="dimmed">
+                  Completed
+                </Text>
+              </div>
+            }
+          />
+        </div>
+      </div>
+    </Card>
   );
 }
+
