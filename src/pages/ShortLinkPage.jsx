@@ -1,5 +1,5 @@
 import React from 'react';
-import PageWrapper from "./PageWrapper";
+import PageWrapper from "./PageContainer";
 import ShortcutLinks from '../components/shorcut-links/ShorcutLinks';
 import { connect } from 'react-redux';
 import { setModuleTitle } from './../actions/AppStateActions';

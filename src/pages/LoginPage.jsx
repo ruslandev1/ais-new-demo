@@ -3,10 +3,10 @@ import {connect} from "react-redux";
 import { useLocation, Navigate , useNavigate} from "react-router-dom";
 
 import withRouter from "../utils/WithRouterAlt"
-import LoginForm from "../components/LoginForm";
+import LoginForm from "../components/Login/LoginForm";
 
 
-const LoginPage = (props) => { 
+const LoginPage = (props) => {
     console.log("login-state-page: ", props)
     const navigate = useNavigate();
     return props.isAuthenticated ? <Navigate replace to="/"/>  : <LoginForm />;

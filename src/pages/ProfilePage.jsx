@@ -1,13 +1,14 @@
 import React from 'react';
-import PageWrapper from "./PageWrapper";
+import PageWrapper from "./PageContainer";
 import {connect} from "react-redux";
 import {setModuleTitle} from "../actions/AppStateActions";
 // import EmpProfilFunc from '../components/employee/EmpProfile';
 import  EmpProfile from '../components/employee/EmpProfile';
+import DashboardLayout from './Dashboard/layout';
 
 const ProfilePage = props => {
     console.log('PROFILE_PROPS', props)
-    return <PageWrapper component={<EmpProfile empId={props.user.empId}/>}/>
+    return <DashboardLayout children={<EmpProfile empId={props.user.empId}/>}/>
 };
 
 

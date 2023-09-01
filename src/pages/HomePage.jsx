@@ -1,13 +1,14 @@
 import React from "react";
-import PageWrapper from "./PageWrapper";
+import PageWrapper from "./PageContainer";
 import Dashboard from "./DashBoardPage";
 import { connect } from "react-redux";
 import { setModuleTitle } from "../actions/AppStateActions";
+import DashboardLayout from "./Dashboard/layout";
 
 
 const HomePage = (props) => {
   console.log("HOMEPAGE PROPS", props)
-  return <PageWrapper component={<Dashboard  empId={props.user.empId}/>}/>
+  return <DashboardLayout children={<Dashboard  empId={props.user.empId}/>}/>
 }
 
 
