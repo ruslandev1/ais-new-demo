@@ -12,8 +12,8 @@ const Footer = () => {
                 position: "fixed",
                 bottom: 0,
                 right: 0,
-                left: 0,    
-                zIndex: 2
+                left: 0,
+                zIndex: 999
             }}>©2023</div>
         </footer>
     )
